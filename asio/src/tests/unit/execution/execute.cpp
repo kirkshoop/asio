@@ -28,6 +28,7 @@
 # include <functional>
 #endif // defined(ASIO_HAS_BOOST_BIND)
 
+namespace tinvk = asio::tag_invokes;
 namespace exec = asio::execution;
 
 struct no_execute
@@ -188,6 +189,29 @@ struct execute_free<const free_execute_non_const_executor&, F>
 
 #endif // defined(ASIO_HAS_MOVE)
 
+struct free_tag_invoke_execute_non_const_executor
+{
+  template <typename F>
+  friend void tag_invoke(decltype(exec::execute), free_tag_invoke_execute_non_const_executor&,
+      ASIO_MOVE_ARG(F) f)
+  {
+    typename asio::decay<F>::type tmp(ASIO_MOVE_CAST(F)(f));
+    tmp();
+  }
+};
+
+struct free_tag_invoke_execute_const_executor
+{
+  template <typename F>
+  friend void tag_invoke(decltype(exec::execute), const free_tag_invoke_execute_const_executor&,
+      ASIO_MOVE_ARG(F) f)
+  {
+    typename asio::decay<F>::type tmp(ASIO_MOVE_CAST(F)(f));
+    tmp();
+  }
+};
+
+
 struct operation_state
 {
   friend void tag_invoke(decltype(exec::start), operation_state&) ASIO_NOEXCEPT
@@ -243,31 +267,47 @@ void test_can_execute()
       const free_execute_const_executor&, exec::invocable_archetype>::value;
   ASIO_CHECK(b6 == true);
 
-#if defined(ASIO_HAS_MOVE)
   ASIO_CONSTEXPR bool b7 = exec::can_execute<
-      non_const_member_execute&, exec::invocable_archetype>::value;
+      free_tag_invoke_execute_const_executor&, exec::invocable_archetype>::value;
   ASIO_CHECK(b7 == true);
 
   ASIO_CONSTEXPR bool b8 = exec::can_execute<
-      const non_const_member_execute&, exec::invocable_archetype>::value;
-  ASIO_CHECK(b8 == false);
+      const free_tag_invoke_execute_const_executor&, exec::invocable_archetype>::value;
+  ASIO_CHECK(b8 == true);
 
+#if defined(ASIO_HAS_MOVE)
   ASIO_CONSTEXPR bool b9 = exec::can_execute<
-      free_execute_non_const_executor&, exec::invocable_archetype>::value;
+      non_const_member_execute&, exec::invocable_archetype>::value;
   ASIO_CHECK(b9 == true);
 
   ASIO_CONSTEXPR bool b10 = exec::can_execute<
-      const free_execute_non_const_executor&, exec::invocable_archetype>::value;
+      const non_const_member_execute&, exec::invocable_archetype>::value;
   ASIO_CHECK(b10 == false);
-#endif // defined(ASIO_HAS_MOVE)
 
   ASIO_CONSTEXPR bool b11 = exec::can_execute<
-      sender&, exec::invocable_archetype>::value;
+      free_execute_non_const_executor&, exec::invocable_archetype>::value;
   ASIO_CHECK(b11 == true);
 
   ASIO_CONSTEXPR bool b12 = exec::can_execute<
+      const free_execute_non_const_executor&, exec::invocable_archetype>::value;
+  ASIO_CHECK(b12 == false);
+
+  ASIO_CONSTEXPR bool b13 = exec::can_execute<
+      free_tag_invoke_execute_non_const_executor&, exec::invocable_archetype>::value;
+  ASIO_CHECK(b13 == true);
+
+  ASIO_CONSTEXPR bool b14 = exec::can_execute<
+      const free_tag_invoke_execute_non_const_executor&, exec::invocable_archetype>::value;
+  ASIO_CHECK(b14 == false);
+#endif // defined(ASIO_HAS_MOVE)
+
+  ASIO_CONSTEXPR bool b15 = exec::can_execute<
+      sender&, exec::invocable_archetype>::value;
+  ASIO_CHECK(b15 == true);
+
+  ASIO_CONSTEXPR bool b16 = exec::can_execute<
       const sender&, exec::invocable_archetype>::value;
-  ASIO_CHECK(b12 == true);
+  ASIO_CHECK(b16 == true);
 }
 
 void increment(int* count)
@@ -312,26 +352,47 @@ void test_execute()
       bindns::bind(&increment, &count));
   ASIO_CHECK(count == 1);
 
-#if defined(ASIO_HAS_MOVE)
   count = 0;
-  non_const_member_execute ex5 = {};
-  exec::execute(ex5, bindns::bind(&increment, &count));
+  const free_tag_invoke_execute_const_executor ex5 = {};
+  tinvk::tag_invoke(exec::execute, ex5, bindns::bind(&increment, &count));
+  // exec::execute(ex5, bindns::bind(&increment, &count));
   ASIO_CHECK(count == 1);
 
   count = 0;
-  free_execute_non_const_executor ex6 = {};
+  const free_tag_invoke_execute_const_executor ex6 = {};
   exec::execute(ex6, bindns::bind(&increment, &count));
+  ASIO_CHECK(count == 1);
+
+  count = 0;
+  exec::execute(free_tag_invoke_execute_const_executor(),
+      bindns::bind(&increment, &count));
+  ASIO_CHECK(count == 1);
+
+#if defined(ASIO_HAS_MOVE)
+  count = 0;
+  non_const_member_execute ex7 = {};
+  exec::execute(ex7, bindns::bind(&increment, &count));
+  ASIO_CHECK(count == 1);
+
+  count = 0;
+  free_execute_non_const_executor ex8 = {};
+  exec::execute(ex8, bindns::bind(&increment, &count));
+  ASIO_CHECK(count == 1);
+
+  count = 0;
+  free_tag_invoke_execute_non_const_executor ex9 = {};
+  exec::execute(ex9, bindns::bind(&increment, &count));
   ASIO_CHECK(count == 1);
 #endif // defined(ASIO_HAS_MOVE)
 
   count = 0;
-  sender ex7;
-  exec::execute(ex3, bindns::bind(&increment, &count));
+  sender ex10;
+  exec::execute(ex10, bindns::bind(&increment, &count));
   ASIO_CHECK(count == 1);
 
   count = 0;
-  const sender ex8;
-  exec::execute(ex4, bindns::bind(&increment, &count));
+  const sender ex11;
+  exec::execute(ex11, bindns::bind(&increment, &count));
   ASIO_CHECK(count == 1);
 }
 

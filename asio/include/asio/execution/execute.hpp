@@ -19,6 +19,7 @@
 #include "asio/detail/type_traits.hpp"
 #include "asio/execution/detail/as_invocable.hpp"
 #include "asio/execution/detail/as_receiver.hpp"
+#include "asio/tag_invokes/tag_invoke.hpp"
 #include "asio/traits/execute_member.hpp"
 #include "asio/traits/execute_free.hpp"
 
@@ -95,14 +96,19 @@ using asio::execution::detail::is_as_invocable;
 using asio::execution::is_sender_to;
 using asio::false_type;
 using asio::result_of;
+using asio::tag_invokes::can_tag_invoke;
+using asio::tag_invokes::tag_invoke_result;
+using asio::tag_invokes::is_nothrow_tag_invoke;
 using asio::traits::execute_free;
 using asio::traits::execute_member;
 using asio::true_type;
 
 void execute();
+struct impl;
 
 enum overload_type
 {
+  call_tag_invoke,
   call_member,
   call_free,
   adapter,
@@ -119,6 +125,22 @@ template <typename T, typename F>
 struct call_traits<T, void(F),
   typename enable_if<
     (
+      can_tag_invoke<impl, T, F>::value
+    )
+  >::type>
+{
+  ASIO_STATIC_CONSTEXPR(overload_type, overload = call_tag_invoke);
+  ASIO_STATIC_CONSTEXPR(bool, is_valid = true);
+  ASIO_STATIC_CONSTEXPR(bool, is_noexcept = (is_nothrow_tag_invoke<impl, T, F>::value));
+  typedef typename tag_invoke_result<impl, T, F>::type result_type;
+};
+
+template <typename T, typename F>
+struct call_traits<T, void(F),
+  typename enable_if<
+    (
+      !can_tag_invoke<impl, T, F>::value
+      &&
       execute_member<T, F>::is_valid
     )
   >::type> :
@@ -131,6 +153,8 @@ template <typename T, typename F>
 struct call_traits<T, void(F),
   typename enable_if<
     (
+      !can_tag_invoke<impl, T, F>::value
+      &&
       !execute_member<T, F>::is_valid
       &&
       execute_free<T, F>::is_valid
@@ -145,6 +169,8 @@ template <typename T, typename F>
 struct call_traits<T, void(F),
   typename enable_if<
     (
+      !can_tag_invoke<impl, T, F>::value
+      &&
       !execute_member<T, F>::is_valid
       &&
       !execute_free<T, F>::is_valid
@@ -174,6 +200,20 @@ struct call_traits<T, void(F),
 
 struct impl
 {
+  template <typename T, typename F>
+  ASIO_CONSTEXPR typename enable_if<
+    call_traits<T, void(F)>::overload == call_tag_invoke,
+    typename call_traits<T, void(F)>::result_type
+  >::type
+  operator()(
+      ASIO_MOVE_ARG(T) t,
+      ASIO_MOVE_ARG(F) f) const
+    ASIO_NOEXCEPT_IF((
+      call_traits<T, void(F)>::is_noexcept))
+  {
+    return asio::tag_invokes::tag_invoke(*this, ASIO_MOVE_CAST(T)(t), ASIO_MOVE_CAST(F)(f));
+  }
+
   template <typename T, typename F>
   ASIO_CONSTEXPR typename enable_if<
     call_traits<T, void(F)>::overload == call_member,
