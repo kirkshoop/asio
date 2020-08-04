@@ -391,6 +391,7 @@ sub copy_include_files
       "include/asio/ssl/impl",
       "include/asio/ssl/old",
       "include/asio/ssl/old/detail",
+      "include/asio/tag_invokes",
       "include/asio/traits",
       "include/asio/ts",
       "include/asio/windows");
@@ -441,6 +442,7 @@ sub copy_unit_tests
       "src/tests/unit/local",
       "src/tests/unit/posix",
       "src/tests/unit/ssl",
+      "src/tests/unit/tag_invokes",
       "src/tests/unit/ts",
       "src/tests/unit/windows");
 

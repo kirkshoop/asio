@@ -4906,6 +4906,7 @@
 /include/asio/system_error.hpp
 /include/asio/system_executor.hpp
 /include/asio/system_timer.hpp
+/include/asio/tag_invokes/tag_invoke.hpp
 /include/asio/this_coro.hpp
 /include/asio/thread.hpp
 /include/asio/thread_pool.hpp
@@ -5621,6 +5622,7 @@
 /src/tests/unit/system_context.cpp
 /src/tests/unit/system_executor.cpp
 /src/tests/unit/system_timer.cpp
+/src/tests/unit/tag_invokes/tag_invoke.cpp
 /src/tests/unit/this_coro.cpp
 /src/tests/unit/thread.cpp
 /src/tests/unit/thread_pool.cpp

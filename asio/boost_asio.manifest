@@ -517,6 +517,7 @@
 /boost/asio/system_context.hpp
 /boost/asio/system_executor.hpp
 /boost/asio/system_timer.hpp
+/boost/asio/tag_invokes/tag_invoke.hpp
 /boost/asio/this_coro.hpp
 /boost/asio/thread_pool.hpp
 /boost/asio/time_traits.hpp
@@ -6043,6 +6044,7 @@
 /libs/asio/test/system_context.cpp
 /libs/asio/test/system_executor.cpp
 /libs/asio/test/system_timer.cpp
+/libs/asio/test/tag_invokes/tag_invoke.cpp
 /libs/asio/test/this_coro.cpp
 /libs/asio/test/thread_pool.cpp
 /libs/asio/test/time_traits.cpp

@@ -502,6 +502,7 @@ nobase_include_HEADERS = \
 	asio/thread.hpp \
 	asio/thread_pool.hpp \
 	asio/time_traits.hpp \
+	asio/tag_invokes/tag_invoke.hpp \
 	asio/traits/bulk_execute_free.hpp \
 	asio/traits/bulk_execute_member.hpp \
 	asio/traits/connect_free.hpp \
@@ -533,6 +534,8 @@ nobase_include_HEADERS = \
 	asio/traits/static_require_concept.hpp \
 	asio/traits/submit_free.hpp \
 	asio/traits/submit_member.hpp \
+	asio/traits/tag_invoke_free.hpp \
+	asio/traits/tag_invoke_member.hpp \
 	asio/ts/buffer.hpp \
 	asio/ts/executor.hpp \
 	asio/ts/internet.hpp \
