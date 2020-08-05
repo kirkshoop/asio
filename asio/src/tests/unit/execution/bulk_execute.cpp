@@ -55,30 +55,13 @@ struct sender : exec::sender_base
   }
 
   template <typename R>
-  operation_state connect(ASIO_MOVE_ARG(R) r) const
+  friend
+  operation_state tag_invoke(decltype(exec::connect), const sender&, ASIO_MOVE_ARG(R) r)
   {
     (void)r;
     return operation_state();
   }
 };
-
-namespace asio {
-namespace traits {
-
-#if !defined(ASIO_HAS_DEDUCED_CONNECT_MEMBER_TRAIT)
-
-template <typename R>
-struct connect_member<const sender, R>
-{
-  ASIO_STATIC_CONSTEXPR(bool, is_valid = true);
-  ASIO_STATIC_CONSTEXPR(bool, is_noexcept = false);
-  typedef operation_state result_type;
-};
-
-#endif // !defined(ASIO_HAS_DEDUCED_CONNECT_MEMBER_TRAIT)
-
-} // namespace traits
-} // namespace asio
 
 struct no_bulk_execute
 {

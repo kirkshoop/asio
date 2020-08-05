@@ -138,30 +138,13 @@ struct typed_sender
   }
 
   template <typename R>
-  operation_state connect(ASIO_MOVE_ARG(R) r) const
+  friend
+  operation_state tag_invoke(decltype(exec::connect), const typed_sender&, ASIO_MOVE_ARG(R) r)
   {
     (void)r;
     return operation_state();
   }
 };
-
-namespace asio {
-namespace traits {
-
-#if !defined(ASIO_HAS_DEDUCED_CONNECT_MEMBER_TRAIT)
-
-template <typename R>
-struct connect_member<const typed_sender, R>
-{
-  ASIO_STATIC_CONSTEXPR(bool, is_valid = true);
-  ASIO_STATIC_CONSTEXPR(bool, is_noexcept = false);
-  typedef operation_state result_type;
-};
-
-#endif // !defined(ASIO_HAS_DEDUCED_CONNECT_MEMBER_TRAIT)
-
-} // namespace traits
-} // namespace asio
 
 #endif // defined(ASIO_HAS_DEDUCED_EXECUTION_IS_TYPED_SENDER_TRAIT)
 

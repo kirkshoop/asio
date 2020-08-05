@@ -505,8 +505,6 @@ nobase_include_HEADERS = \
 	asio/tag_invokes/tag_invoke.hpp \
 	asio/traits/bulk_execute_free.hpp \
 	asio/traits/bulk_execute_member.hpp \
-	asio/traits/connect_free.hpp \
-	asio/traits/connect_member.hpp \
 	asio/traits/equality_comparable.hpp \
 	asio/traits/execute_free.hpp \
 	asio/traits/execute_member.hpp \

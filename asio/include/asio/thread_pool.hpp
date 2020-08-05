@@ -616,15 +616,16 @@ public:
    * operation_state concept.
    */
   template <ASIO_EXECUTION_RECEIVER_OF_0 Receiver>
+  friend
 #if defined(GENERATING_DOCUMENTATION)
   unspecified
 #else // defined(GENERATING_DOCUMENTATION)
   execution::detail::as_operation<basic_executor_type, Receiver>
 #endif // defined(GENERATING_DOCUMENTATION)
-  connect(ASIO_MOVE_ARG(Receiver) r) const
+  tag_invoke(decltype(execution::connect), const basic_executor_type& that, ASIO_MOVE_ARG(Receiver) r)
   {
     return execution::detail::as_operation<basic_executor_type, Receiver>(
-        *this, ASIO_MOVE_CAST(Receiver)(r));
+        that, ASIO_MOVE_CAST(Receiver)(r));
   }
 
 #if !defined(ASIO_NO_TS_EXECUTORS)
@@ -804,23 +805,6 @@ struct schedule_member<
 };
 
 #endif // !defined(ASIO_HAS_DEDUCED_SCHEDULE_MEMBER_TRAIT)
-
-#if !defined(ASIO_HAS_DEDUCED_CONNECT_MEMBER_TRAIT)
-
-template <typename Allocator, unsigned int Bits, typename Receiver>
-struct connect_member<
-    const asio::thread_pool::basic_executor_type<Allocator, Bits>,
-    Receiver
-  >
-{
-  ASIO_STATIC_CONSTEXPR(bool, is_valid = true);
-  ASIO_STATIC_CONSTEXPR(bool, is_noexcept = false);
-  typedef asio::execution::detail::as_operation<
-      asio::thread_pool::basic_executor_type<Allocator, Bits>,
-      Receiver> result_type;
-};
-
-#endif // !defined(ASIO_HAS_DEDUCED_CONNECT_MEMBER_TRAIT)
 
 #if !defined(ASIO_HAS_DEDUCED_REQUIRE_MEMBER_TRAIT)
 

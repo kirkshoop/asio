@@ -90,7 +90,8 @@ struct const_member_submit : exec::sender_base
   }
 
   template <typename R>
-  operation_state connect(ASIO_MOVE_ARG(R) r) const
+  friend
+  operation_state tag_invoke(decltype(exec::connect), const const_member_submit&, ASIO_MOVE_ARG(R) r)
   {
     (void)r;
     return operation_state();
@@ -106,18 +107,6 @@ struct const_member_submit : exec::sender_base
 
 namespace asio {
 namespace traits {
-
-#if !defined(ASIO_HAS_DEDUCED_CONNECT_MEMBER_TRAIT)
-
-template <typename R>
-struct connect_member<const const_member_submit, R>
-{
-  ASIO_STATIC_CONSTEXPR(bool, is_valid = true);
-  ASIO_STATIC_CONSTEXPR(bool, is_noexcept = false);
-  typedef operation_state result_type;
-};
-
-#endif // !defined(ASIO_HAS_DEDUCED_CONNECT_MEMBER_TRAIT)
 
 #if !defined(ASIO_HAS_DEDUCED_SUBMIT_MEMBER_TRAIT)
 
@@ -141,7 +130,7 @@ struct free_submit_const_receiver : exec::sender_base
   }
 
   template <typename R>
-  friend operation_state connect(
+  friend operation_state tag_invoke(decltype(exec::connect), 
       const free_submit_const_receiver&, ASIO_MOVE_ARG(R) r)
   {
     (void)r;
@@ -159,18 +148,6 @@ struct free_submit_const_receiver : exec::sender_base
 
 namespace asio {
 namespace traits {
-
-#if !defined(ASIO_HAS_DEDUCED_CONNECT_FREE_TRAIT)
-
-template <typename R>
-struct connect_free<const free_submit_const_receiver, R>
-{
-  ASIO_STATIC_CONSTEXPR(bool, is_valid = true);
-  ASIO_STATIC_CONSTEXPR(bool, is_noexcept = false);
-  typedef operation_state result_type;
-};
-
-#endif // !defined(ASIO_HAS_DEDUCED_CONNECT_FREE_TRAIT)
 
 #if !defined(ASIO_HAS_DEDUCED_SUBMIT_FREE_TRAIT)
 
@@ -194,7 +171,8 @@ struct non_const_member_submit : exec::sender_base
   }
 
   template <typename R>
-  operation_state connect(ASIO_MOVE_ARG(R) r)
+  friend
+  operation_state tag_invoke(decltype(exec::connect), non_const_member_submit&, ASIO_MOVE_ARG(R) r)
   {
     (void)r;
     return operation_state();
@@ -210,18 +188,6 @@ struct non_const_member_submit : exec::sender_base
 
 namespace asio {
 namespace traits {
-
-#if !defined(ASIO_HAS_DEDUCED_CONNECT_MEMBER_TRAIT)
-
-template <typename R>
-struct connect_member<non_const_member_submit, R>
-{
-  ASIO_STATIC_CONSTEXPR(bool, is_valid = true);
-  ASIO_STATIC_CONSTEXPR(bool, is_noexcept = false);
-  typedef operation_state result_type;
-};
-
-#endif // !defined(ASIO_HAS_DEDUCED_CONNECT_MEMBER_TRAIT)
 
 #if !defined(ASIO_HAS_DEDUCED_SUBMIT_MEMBER_TRAIT)
 
@@ -245,7 +211,7 @@ struct free_submit_non_const_receiver : exec::sender_base
   }
 
   template <typename R>
-  friend operation_state connect(
+  friend operation_state tag_invoke(decltype(exec::connect), 
       free_submit_non_const_receiver&, ASIO_MOVE_ARG(R) r)
   {
     (void)r;
@@ -263,18 +229,6 @@ struct free_submit_non_const_receiver : exec::sender_base
 
 namespace asio {
 namespace traits {
-
-#if !defined(ASIO_HAS_DEDUCED_CONNECT_FREE_TRAIT)
-
-template <typename R>
-struct connect_free<free_submit_non_const_receiver, R>
-{
-  ASIO_STATIC_CONSTEXPR(bool, is_valid = true);
-  ASIO_STATIC_CONSTEXPR(bool, is_noexcept = false);
-  typedef operation_state result_type;
-};
-
-#endif // !defined(ASIO_HAS_DEDUCED_CONNECT_FREE_TRAIT)
 
 #if !defined(ASIO_HAS_DEDUCED_SUBMIT_FREE_TRAIT)
 

@@ -524,8 +524,6 @@
 /boost/asio/traits/
 /boost/asio/traits/bulk_execute_free.hpp
 /boost/asio/traits/bulk_execute_member.hpp
-/boost/asio/traits/connect_free.hpp
-/boost/asio/traits/connect_member.hpp
 /boost/asio/traits/equality_comparable.hpp
 /boost/asio/traits/execute_free.hpp
 /boost/asio/traits/execute_member.hpp

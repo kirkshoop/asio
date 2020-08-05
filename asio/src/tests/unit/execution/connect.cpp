@@ -56,42 +56,15 @@ struct no_connect_2 : exec::sender_base
 {
 };
 
-struct no_connect_3
+struct free_tag_invoke_connect_const_receiver : exec::sender_base
 {
-  template <typename R>
-  operation_state connect(ASIO_MOVE_ARG(R) r)
-  {
-    (void)r;
-    return operation_state();
-  }
-};
-
-#if !defined(ASIO_HAS_DEDUCED_CONNECT_MEMBER_TRAIT)
-
-namespace asio {
-namespace traits {
-
-template <typename R>
-struct connect_member<no_connect_3, R>
-{
-  ASIO_STATIC_CONSTEXPR(bool, is_valid = true);
-  ASIO_STATIC_CONSTEXPR(bool, is_noexcept = false);
-  typedef operation_state result_type;
-};
-
-} // namespace traits
-} // namespace asio
-
-#endif // !defined(ASIO_HAS_DEDUCED_CONNECT_MEMBER_TRAIT)
-
-struct const_member_connect : exec::sender_base
-{
-  const_member_connect()
+  free_tag_invoke_connect_const_receiver()
   {
   }
 
   template <typename R>
-  operation_state connect(ASIO_MOVE_ARG(R) r) const
+  friend operation_state tag_invoke(decltype(exec::connect), 
+      const free_tag_invoke_connect_const_receiver&, ASIO_MOVE_ARG(R) r)
   {
     (void)r;
     ++call_count;
@@ -99,120 +72,21 @@ struct const_member_connect : exec::sender_base
   }
 };
 
-#if !defined(ASIO_HAS_DEDUCED_CONNECT_MEMBER_TRAIT)
-
-namespace asio {
-namespace traits {
-
-template <typename R>
-struct connect_member<const const_member_connect, R>
+struct free_tag_invoke_connect_non_const_receiver : exec::sender_base
 {
-  ASIO_STATIC_CONSTEXPR(bool, is_valid = true);
-  ASIO_STATIC_CONSTEXPR(bool, is_noexcept = false);
-  typedef operation_state result_type;
-};
-
-} // namespace traits
-} // namespace asio
-
-#endif // !defined(ASIO_HAS_DEDUCED_CONNECT_MEMBER_TRAIT)
-
-struct free_connect_const_receiver : exec::sender_base
-{
-  free_connect_const_receiver()
+  free_tag_invoke_connect_non_const_receiver()
   {
   }
 
   template <typename R>
-  friend operation_state connect(
-      const free_connect_const_receiver&, ASIO_MOVE_ARG(R) r)
+  friend operation_state tag_invoke(decltype(exec::connect), 
+      free_tag_invoke_connect_non_const_receiver&, ASIO_MOVE_ARG(R) r)
   {
     (void)r;
     ++call_count;
     return operation_state();
   }
 };
-
-#if !defined(ASIO_HAS_DEDUCED_CONNECT_FREE_TRAIT)
-
-namespace asio {
-namespace traits {
-
-template <typename R>
-struct connect_free<const free_connect_const_receiver, R>
-{
-  ASIO_STATIC_CONSTEXPR(bool, is_valid = true);
-  ASIO_STATIC_CONSTEXPR(bool, is_noexcept = false);
-  typedef operation_state result_type;
-};
-
-} // namespace traits
-} // namespace asio
-
-#endif // !defined(ASIO_HAS_DEDUCED_CONNECT_FREE_TRAIT)
-
-struct non_const_member_connect : exec::sender_base
-{
-  template <typename R>
-  operation_state connect(ASIO_MOVE_ARG(R) r)
-  {
-    (void)r;
-    ++call_count;
-    return operation_state();
-  }
-};
-
-#if !defined(ASIO_HAS_DEDUCED_CONNECT_MEMBER_TRAIT)
-
-namespace asio {
-namespace traits {
-
-template <typename R>
-struct connect_member<non_const_member_connect, R>
-{
-  ASIO_STATIC_CONSTEXPR(bool, is_valid = true);
-  ASIO_STATIC_CONSTEXPR(bool, is_noexcept = false);
-  typedef operation_state result_type;
-};
-
-} // namespace traits
-} // namespace asio
-
-#endif // !defined(ASIO_HAS_DEDUCED_CONNECT_MEMBER_TRAIT)
-
-struct free_connect_non_const_receiver : exec::sender_base
-{
-  free_connect_non_const_receiver()
-  {
-  }
-
-  template <typename R>
-  friend operation_state connect(
-      free_connect_non_const_receiver&, ASIO_MOVE_ARG(R) r)
-  {
-    (void)r;
-    ++call_count;
-    return operation_state();
-  }
-};
-
-#if !defined(ASIO_HAS_DEDUCED_CONNECT_FREE_TRAIT)
-
-namespace asio {
-namespace traits {
-
-template <typename R>
-struct connect_free<free_connect_non_const_receiver, R>
-{
-  ASIO_STATIC_CONSTEXPR(bool, is_valid = true);
-  ASIO_STATIC_CONSTEXPR(bool, is_noexcept = false);
-  typedef operation_state result_type;
-};
-
-} // namespace traits
-} // namespace asio
-
-#endif // !defined(ASIO_HAS_DEDUCED_CONNECT_FREE_TRAIT)
 
 struct receiver
 {
@@ -350,52 +224,28 @@ void test_can_connect()
   ASIO_CHECK(b4 == false);
 
   ASIO_CONSTEXPR bool b5 = exec::can_connect<
-      no_connect_3&, receiver>::value;
-  ASIO_CHECK(b5 == false);
+      free_tag_invoke_connect_const_receiver&, receiver>::value;
+  ASIO_CHECK(b5 == true);
 
   ASIO_CONSTEXPR bool b6 = exec::can_connect<
-      const no_connect_3&, receiver>::value;
-  ASIO_CHECK(b6 == false);
+      const free_tag_invoke_connect_const_receiver&, receiver>::value;
+  ASIO_CHECK(b6 == true);
 
   ASIO_CONSTEXPR bool b7 = exec::can_connect<
-      const_member_connect&, receiver>::value;
+      free_tag_invoke_connect_non_const_receiver&, receiver>::value;
   ASIO_CHECK(b7 == true);
 
   ASIO_CONSTEXPR bool b8 = exec::can_connect<
-      const const_member_connect&, receiver>::value;
-  ASIO_CHECK(b8 == true);
+      const free_tag_invoke_connect_non_const_receiver&, receiver>::value;
+  ASIO_CHECK(b8 == false);
 
   ASIO_CONSTEXPR bool b9 = exec::can_connect<
-      free_connect_const_receiver&, receiver>::value;
+      executor&, receiver>::value;
   ASIO_CHECK(b9 == true);
 
   ASIO_CONSTEXPR bool b10 = exec::can_connect<
-      const free_connect_const_receiver&, receiver>::value;
-  ASIO_CHECK(b10 == true);
-
-  ASIO_CONSTEXPR bool b11 = exec::can_connect<
-      non_const_member_connect&, receiver>::value;
-  ASIO_CHECK(b11 == true);
-
-  ASIO_CONSTEXPR bool b12 = exec::can_connect<
-      const non_const_member_connect&, receiver>::value;
-  ASIO_CHECK(b12 == false);
-
-  ASIO_CONSTEXPR bool b13 = exec::can_connect<
-      free_connect_non_const_receiver&, receiver>::value;
-  ASIO_CHECK(b13 == true);
-
-  ASIO_CONSTEXPR bool b14 = exec::can_connect<
-      const free_connect_non_const_receiver&, receiver>::value;
-  ASIO_CHECK(b14 == false);
-
-  ASIO_CONSTEXPR bool b15 = exec::can_connect<
-      executor&, receiver>::value;
-  ASIO_CHECK(b15 == true);
-
-  ASIO_CONSTEXPR bool b16 = exec::can_connect<
       const executor&, receiver>::value;
-  ASIO_CHECK(b16 == true);
+  ASIO_CHECK(b10 == true);
 }
 
 void increment(int* count)
@@ -408,47 +258,24 @@ void test_connect()
   receiver r;
 
   call_count = 0;
-  const_member_connect s1;
-  operation_state o1 = exec::connect(s1, r);
-  ASIO_CHECK(call_count == 1);
-  (void)o1;
-
-  call_count = 0;
-  const const_member_connect s2;
-  operation_state o2 = exec::connect(s2, r);
-  ASIO_CHECK(call_count == 1);
-  (void)o2;
-
-  call_count = 0;
-  operation_state o3 = exec::connect(const_member_connect(), r);
-  ASIO_CHECK(call_count == 1);
-  (void)o3;
-
-  call_count = 0;
-  free_connect_const_receiver s3;
+  free_tag_invoke_connect_const_receiver s3;
   operation_state o4 = exec::connect(s3, r);
   ASIO_CHECK(call_count == 1);
   (void)o4;
 
   call_count = 0;
-  const free_connect_const_receiver s4;
+  const free_tag_invoke_connect_const_receiver s4;
   operation_state o5 = exec::connect(s4, r);
   ASIO_CHECK(call_count == 1);
   (void)o5;
 
   call_count = 0;
-  operation_state o6 = exec::connect(free_connect_const_receiver(), r);
+  operation_state o6 = exec::connect(free_tag_invoke_connect_const_receiver(), r);
   ASIO_CHECK(call_count == 1);
   (void)o6;
 
   call_count = 0;
-  non_const_member_connect s5;
-  operation_state o7 = exec::connect(s5, r);
-  ASIO_CHECK(call_count == 1);
-  (void)o7;
-
-  call_count = 0;
-  free_connect_non_const_receiver s6;
+  free_tag_invoke_connect_non_const_receiver s6;
   operation_state o8 = exec::connect(s6, r);
   ASIO_CHECK(call_count == 1);
   (void)o8;

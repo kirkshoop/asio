@@ -4914,8 +4914,6 @@
 /include/asio/traits/
 /include/asio/traits/bulk_execute_free.hpp
 /include/asio/traits/bulk_execute_member.hpp
-/include/asio/traits/connect_free.hpp
-/include/asio/traits/connect_member.hpp
 /include/asio/traits/equality_comparable.hpp
 /include/asio/traits/execute_free.hpp
 /include/asio/traits/execute_member.hpp

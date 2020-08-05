@@ -24,8 +24,7 @@
 #include "asio/execution/operation_state.hpp"
 #include "asio/execution/receiver.hpp"
 #include "asio/execution/sender.hpp"
-#include "asio/traits/connect_member.hpp"
-#include "asio/traits/connect_free.hpp"
+#include "asio/tag_invokes/tag_invoke.hpp"
 
 #include "asio/detail/push_options.hpp"
 
@@ -42,15 +41,10 @@ namespace execution {
  * such that <tt>decltype((r))</tt> is <tt>R</tt>. The expression
  * <tt>execution::connect(s, r)</tt> is expression-equivalent to:
  *
- * @li <tt>s.connect(r)</tt>, if that expression is valid, if its type
- *   satisfies <tt>operation_state</tt>, and if <tt>S</tt> satisfies
- *   <tt>sender</tt>.
- *
- * @li Otherwise, <tt>connect(s, r)</tt>, if that expression is valid, if its
+ * @li <tt>connect(s, r)</tt>, if that expression is valid, if its
  *   type satisfies <tt>operation_state</tt>, and if <tt>S</tt> satisfies
- *   <tt>sender</tt>, with overload resolution performed in a context that
- *   includes the declaration <tt>void connect();</tt> and that does not include
- *   a declaration of <tt>execution::connect</tt>.
+ *   <tt>sender</tt>, and if the expression 
+ *   <tt>asio::tag_invokes::tag_invoke(connect, s, r)</tt> is valid.
  *
  * @li Otherwise, <tt>as_operation{s, r}</tt>, if <tt>r</tt> is not an instance
  *  of <tt>as_receiver<F, S></tt> for some type <tt>F</tt>, and if
@@ -121,7 +115,7 @@ struct connect_result
   typedef automatically_determined type;
 };
 
-/// A type alis to determine the result of a @c connect expression.
+/// A type alias to determine the result of a @c connect expression.
 template <typename S, typename R>
 using connect_result_t = typename connect_result<S, R>::type;
 
@@ -144,15 +138,15 @@ using asio::execution::is_receiver;
 using asio::execution::is_sender;
 using asio::false_type;
 using asio::remove_cvref;
-using asio::traits::connect_free;
-using asio::traits::connect_member;
+using asio::tag_invokes::can_tag_invoke;
+using asio::tag_invokes::tag_invoke_result;
+using asio::tag_invokes::is_nothrow_tag_invoke;
 
-void connect();
+struct impl;
 
 enum overload_type
 {
-  call_member,
-  call_free,
+  call_tag_invoke,
   adapter,
   ill_formed
 };
@@ -169,43 +163,21 @@ template <typename S, typename R>
 struct call_traits<S, void(R),
   typename enable_if<
     (
-      connect_member<S, R>::is_valid
-      &&
-      is_operation_state<typename connect_member<S, R>::result_type>::value
-      &&
-      is_sender<typename remove_cvref<S>::type>::value
+      can_tag_invoke<impl, S, R>::value
     )
-  >::type> :
-  connect_member<S, R>
+  >::type>
 {
-  ASIO_STATIC_CONSTEXPR(overload_type, overload = call_member);
+  ASIO_STATIC_CONSTEXPR(overload_type, overload = call_tag_invoke);
+  ASIO_STATIC_CONSTEXPR(bool, is_valid = true);
+  ASIO_STATIC_CONSTEXPR(bool, is_noexcept = (is_nothrow_tag_invoke<impl, S, R>::value));
+  typedef typename tag_invoke_result<impl, S, R>::type result_type;
 };
 
 template <typename S, typename R>
 struct call_traits<S, void(R),
   typename enable_if<
     (
-      !connect_member<S, R>::is_valid
-      &&
-      connect_free<S, R>::is_valid
-      &&
-      is_operation_state<typename connect_free<S, R>::result_type>::value
-      &&
-      is_sender<typename remove_cvref<S>::type>::value
-    )
-  >::type> :
-  connect_free<S, R>
-{
-  ASIO_STATIC_CONSTEXPR(overload_type, overload = call_free);
-};
-
-template <typename S, typename R>
-struct call_traits<S, void(R),
-  typename enable_if<
-    (
-      !connect_member<S, R>::is_valid
-      &&
-      !connect_free<S, R>::is_valid
+      !can_tag_invoke<impl, S, R>::value
       &&
       is_receiver<R>::value
       &&
@@ -230,28 +202,17 @@ struct call_traits<S, void(R),
 struct impl
 {
 #if defined(ASIO_HAS_MOVE)
-  template <typename S, typename R>
-  ASIO_CONSTEXPR typename enable_if<
-    call_traits<S, void(R)>::overload == call_member,
-    typename call_traits<S, void(R)>::result_type
-  >::type
-  operator()(S&& s, R&& r) const
-    ASIO_NOEXCEPT_IF((
-      call_traits<S, void(R)>::is_noexcept))
-  {
-    return ASIO_MOVE_CAST(S)(s).connect(ASIO_MOVE_CAST(R)(r));
-  }
 
   template <typename S, typename R>
   ASIO_CONSTEXPR typename enable_if<
-    call_traits<S, void(R)>::overload == call_free,
+    call_traits<S, void(R)>::overload == call_tag_invoke,
     typename call_traits<S, void(R)>::result_type
   >::type
   operator()(S&& s, R&& r) const
     ASIO_NOEXCEPT_IF((
       call_traits<S, void(R)>::is_noexcept))
   {
-    return connect(ASIO_MOVE_CAST(S)(s), ASIO_MOVE_CAST(R)(r));
+    return asio::tag_invokes::tag_invoke(*this, ASIO_MOVE_CAST(S)(s), ASIO_MOVE_CAST(R)(r));
   }
 
   template <typename S, typename R>
@@ -269,50 +230,50 @@ struct impl
 #else // defined(ASIO_HAS_MOVE)
   template <typename S, typename R>
   ASIO_CONSTEXPR typename enable_if<
-    call_traits<S&, void(R&)>::overload == call_member,
+    call_traits<S&, void(R&)>::overload == call_tag_invoke,
     typename call_traits<S&, void(R&)>::result_type
   >::type
   operator()(S& s, R& r) const
     ASIO_NOEXCEPT_IF((
       call_traits<S&, void(R&)>::is_noexcept))
   {
-    return s.connect(r);
+    return asio::tag_invokes::tag_invoke(*this, ASIO_MOVE_CAST(S)(s), ASIO_MOVE_CAST(R)(r));
   }
 
   template <typename S, typename R>
   ASIO_CONSTEXPR typename enable_if<
-    call_traits<const S&, void(R&)>::overload == call_member,
+    call_traits<const S&, void(R&)>::overload == call_tag_invoke,
     typename call_traits<const S&, void(R&)>::result_type
   >::type
   operator()(const S& s, R& r) const
     ASIO_NOEXCEPT_IF((
       call_traits<const S&, void(R&)>::is_noexcept))
   {
-    return s.connect(r);
+    return asio::tag_invokes::tag_invoke(*this, ASIO_MOVE_CAST(S)(s), ASIO_MOVE_CAST(R)(r));
   }
 
   template <typename S, typename R>
   ASIO_CONSTEXPR typename enable_if<
-    call_traits<S&, void(R&)>::overload == call_free,
-    typename call_traits<S&, void(R&)>::result_type
+    call_traits<S&, void(const R&)>::overload == call_tag_invoke,
+    typename call_traits<S&, void(const R&)>::result_type
   >::type
-  operator()(S& s, R& r) const
+  operator()(S& s, const R& r) const
     ASIO_NOEXCEPT_IF((
-      call_traits<S&, void(R&)>::is_noexcept))
+      call_traits<S&, void(const R&)>::is_noexcept))
   {
-    return connect(s, r);
+    return asio::tag_invokes::tag_invoke(*this, ASIO_MOVE_CAST(S)(s), ASIO_MOVE_CAST(R)(r));
   }
 
   template <typename S, typename R>
   ASIO_CONSTEXPR typename enable_if<
-    call_traits<const S&, void(R&)>::overload == call_free,
-    typename call_traits<const S&, void(R&)>::result_type
+    call_traits<const S&, void(const R&)>::overload == call_tag_invoke,
+    typename call_traits<const S&, void(const R&)>::result_type
   >::type
-  operator()(const S& s, R& r) const
+  operator()(const S& s, const R& r) const
     ASIO_NOEXCEPT_IF((
-      call_traits<const S&, void(R&)>::is_noexcept))
+      call_traits<const S&, void(const R&)>::is_noexcept))
   {
-    return connect(s, r);
+    return asio::tag_invokes::tag_invoke(*this, ASIO_MOVE_CAST(S)(s), ASIO_MOVE_CAST(R)(r));
   }
 
   template <typename S, typename R>
@@ -337,54 +298,6 @@ struct impl
       call_traits<const S&, void(R&)>::is_noexcept))
   {
     return typename call_traits<const S&, void(R&)>::result_type(s, r);
-  }
-
-  template <typename S, typename R>
-  ASIO_CONSTEXPR typename enable_if<
-    call_traits<S&, void(const R&)>::overload == call_member,
-    typename call_traits<S&, void(const R&)>::result_type
-  >::type
-  operator()(S& s, const R& r) const
-    ASIO_NOEXCEPT_IF((
-      call_traits<S&, void(const R&)>::is_noexcept))
-  {
-    return s.connect(r);
-  }
-
-  template <typename S, typename R>
-  ASIO_CONSTEXPR typename enable_if<
-    call_traits<const S&, void(const R&)>::overload == call_member,
-    typename call_traits<const S&, void(const R&)>::result_type
-  >::type
-  operator()(const S& s, const R& r) const
-    ASIO_NOEXCEPT_IF((
-      call_traits<const S&, void(const R&)>::is_noexcept))
-  {
-    return s.connect(r);
-  }
-
-  template <typename S, typename R>
-  ASIO_CONSTEXPR typename enable_if<
-    call_traits<S&, void(const R&)>::overload == call_free,
-    typename call_traits<S&, void(const R&)>::result_type
-  >::type
-  operator()(S& s, const R& r) const
-    ASIO_NOEXCEPT_IF((
-      call_traits<S&, void(const R&)>::is_noexcept))
-  {
-    return connect(s, r);
-  }
-
-  template <typename S, typename R>
-  ASIO_CONSTEXPR typename enable_if<
-    call_traits<const S&, void(const R&)>::overload == call_free,
-    typename call_traits<const S&, void(const R&)>::result_type
-  >::type
-  operator()(const S& s, const R& r) const
-    ASIO_NOEXCEPT_IF((
-      call_traits<const S&, void(const R&)>::is_noexcept))
-  {
-    return connect(s, r);
   }
 
   template <typename S, typename R>

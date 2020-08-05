@@ -21,7 +21,6 @@
 #include "asio/execution/executor.hpp"
 #include "asio/execution/set_done.hpp"
 #include "asio/execution/set_error.hpp"
-#include "asio/traits/connect_member.hpp"
 #include "asio/traits/set_done_member.hpp"
 #include "asio/traits/set_error_member.hpp"
 #include "asio/traits/set_value_member.hpp"
@@ -110,48 +109,50 @@ struct bulk_sender : sender_base
   }
 
   template <typename Receiver>
-  typename connect_result<
+  friend
+  typename enable_if<
+    can_connect<
+      typename remove_cvref<Sender>::type,
+      typename bulk_receiver_traits<
+        Sender, Receiver, Function, Number
+      >::arg_type
+    >::value,
+    typename connect_result<
       ASIO_MOVE_OR_LVALUE_TYPE(typename remove_cvref<Sender>::type),
       typename bulk_receiver_traits<
         Sender, Receiver, Function, Number
       >::arg_type
-  >::type connect(ASIO_MOVE_ARG(Receiver) r,
-      typename enable_if<
-        can_connect<
-          typename remove_cvref<Sender>::type,
-          typename bulk_receiver_traits<
-            Sender, Receiver, Function, Number
-          >::arg_type
-        >::value
-      >::type* = 0) ASIO_RVALUE_REF_QUAL ASIO_NOEXCEPT
+    >::type
+  >::type tag_invoke(decltype(execution::connect), bulk_sender&& that, ASIO_MOVE_ARG(Receiver) r) ASIO_NOEXCEPT
   {
     return execution::connect(
-        ASIO_MOVE_OR_LVALUE(typename remove_cvref<Sender>::type)(sender_),
+        ASIO_MOVE_OR_LVALUE(typename remove_cvref<Sender>::type)(that.sender_),
         typename bulk_receiver_traits<Sender, Receiver, Function, Number>::type(
           ASIO_MOVE_CAST(Receiver)(r),
-          ASIO_MOVE_CAST(typename decay<Function>::type)(f_),
-          ASIO_MOVE_CAST(typename decay<Number>::type)(n_)));
+          ASIO_MOVE_CAST(typename decay<Function>::type)(that.f_),
+          ASIO_MOVE_CAST(typename decay<Number>::type)(that.n_)));
   }
 
   template <typename Receiver>
-  typename connect_result<
+  friend
+  typename enable_if<
+    can_connect<
       const typename remove_cvref<Sender>::type&,
       typename bulk_receiver_traits<
         Sender, Receiver, Function, Number
       >::arg_type
-  >::type connect(ASIO_MOVE_ARG(Receiver) r,
-      typename enable_if<
-        can_connect<
-          const typename remove_cvref<Sender>::type&,
-          typename bulk_receiver_traits<
-            Sender, Receiver, Function, Number
-          >::arg_type
-        >::value
-      >::type* = 0) const ASIO_LVALUE_REF_QUAL ASIO_NOEXCEPT
+    >::value,
+    typename connect_result<
+      const typename remove_cvref<Sender>::type&,
+      typename bulk_receiver_traits<
+        Sender, Receiver, Function, Number
+      >::arg_type
+    >::type 
+  >::type tag_invoke(decltype(execution::connect), const bulk_sender& that, ASIO_MOVE_ARG(Receiver) r) ASIO_NOEXCEPT
   {
-    return execution::connect(sender_,
+    return execution::connect(that.sender_,
         typename bulk_receiver_traits<Sender, Receiver, Function, Number>::type(
-          ASIO_MOVE_CAST(Receiver)(r), f_, n_));
+          ASIO_MOVE_CAST(Receiver)(r), that.f_, that.n_));
   }
 };
 
@@ -200,58 +201,6 @@ struct set_done_member<
 };
 
 #endif // !defined(ASIO_HAS_DEDUCED_SET_DONE_MEMBER_TRAIT)
-
-#if !defined(ASIO_HAS_DEDUCED_CONNECT_MEMBER_TRAIT)
-
-template <typename Sender, typename Function,
-    typename Number, typename Receiver>
-struct connect_member<
-    execution::detail::bulk_sender<Sender, Function, Number>,
-    Receiver,
-    typename enable_if<
-      execution::can_connect<
-        ASIO_MOVE_OR_LVALUE_TYPE(typename remove_cvref<Sender>::type),
-        typename execution::detail::bulk_receiver_traits<
-          Sender, Receiver, Function, Number
-        >::arg_type
-      >::value
-    >::type>
-{
-  ASIO_STATIC_CONSTEXPR(bool, is_valid = true);
-  ASIO_STATIC_CONSTEXPR(bool, is_noexcept = false);
-  typedef typename execution::connect_result<
-      ASIO_MOVE_OR_LVALUE_TYPE(typename remove_cvref<Sender>::type),
-      typename execution::detail::bulk_receiver_traits<
-        Sender, Receiver, Function, Number
-      >::arg_type
-    >::type result_type;
-};
-
-template <typename Sender, typename Function,
-    typename Number, typename Receiver>
-struct connect_member<
-    const execution::detail::bulk_sender<Sender, Function, Number>,
-    Receiver,
-    typename enable_if<
-      execution::can_connect<
-        const typename remove_cvref<Sender>::type&,
-        typename execution::detail::bulk_receiver_traits<
-          Sender, Receiver, Function, Number
-        >::arg_type
-      >::value
-    >::type>
-{
-  ASIO_STATIC_CONSTEXPR(bool, is_valid = true);
-  ASIO_STATIC_CONSTEXPR(bool, is_noexcept = false);
-  typedef typename execution::connect_result<
-      const typename remove_cvref<Sender>::type&,
-      typename execution::detail::bulk_receiver_traits<
-        Sender, Receiver, Function, Number
-      >::arg_type
-    >::type result_type;
-};
-
-#endif // !defined(ASIO_HAS_DEDUCED_CONNECT_MEMBER_TRAIT)
 
 } // namespace traits
 } // namespace asio
