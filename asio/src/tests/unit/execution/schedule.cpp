@@ -20,7 +20,6 @@
 #include "asio/execution/sender.hpp"
 #include "asio/execution/submit.hpp"
 #include "asio/traits/start_member.hpp"
-#include "asio/traits/submit_member.hpp"
 #include "../unit_test.hpp"
 
 namespace exec = asio::execution;
@@ -65,30 +64,13 @@ struct sender : exec::sender_base
   }
 
   template <typename R>
-  void submit(ASIO_MOVE_ARG(R) r) const
+  friend
+  void tag_invoke(decltype(exec::submit), const sender&, ASIO_MOVE_ARG(R) r)
   {
     typename asio::decay<R>::type tmp(ASIO_MOVE_CAST(R)(r));
     exec::set_value(tmp);
   }
 };
-
-namespace asio {
-namespace traits {
-
-#if !defined(ASIO_HAS_DEDUCED_SUBMIT_MEMBER_TRAIT)
-
-template <typename R>
-struct submit_member<const sender, R>
-{
-  ASIO_STATIC_CONSTEXPR(bool, is_valid = true);
-  ASIO_STATIC_CONSTEXPR(bool, is_noexcept = false);
-  typedef void result_type;
-};
-
-#endif // !defined(ASIO_HAS_DEDUCED_SUBMIT_MEMBER_TRAIT)
-
-} // namespace traits
-} // namespace asio
 
 struct no_schedule
 {

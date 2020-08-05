@@ -4939,8 +4939,6 @@
 /include/asio/traits/static_query.hpp
 /include/asio/traits/static_require_concept.hpp
 /include/asio/traits/static_require.hpp
-/include/asio/traits/submit_free.hpp
-/include/asio/traits/submit_member.hpp
 /include/asio/ts/
 /include/asio/ts/buffer.hpp
 /include/asio/ts/executor.hpp

@@ -84,7 +84,7 @@ struct const_member_bulk_execute
 namespace asio {
 namespace traits {
 
-#if !defined(ASIO_HAS_DEDUCED_SUBMIT_MEMBER_TRAIT)
+#if !defined(ASIO_HAS_DEDUCED_BULK_EXECUTE_MEMBER_TRAIT)
 
 template <typename F, typename N>
 struct bulk_execute_member<const const_member_bulk_execute, F, N>
@@ -94,7 +94,7 @@ struct bulk_execute_member<const const_member_bulk_execute, F, N>
   typedef sender result_type;
 };
 
-#endif // !defined(ASIO_HAS_DEDUCED_SUBMIT_MEMBER_TRAIT)
+#endif // !defined(ASIO_HAS_DEDUCED_BULK_EXECUTE_MEMBER_TRAIT)
 
 } // namespace traits
 } // namespace asio
@@ -117,7 +117,7 @@ struct free_bulk_execute
 namespace asio {
 namespace traits {
 
-#if !defined(ASIO_HAS_DEDUCED_SUBMIT_FREE_TRAIT)
+#if !defined(ASIO_HAS_DEDUCED_BULK_EXECUTE_FREE_TRAIT)
 
 template <typename F, typename N>
 struct bulk_execute_free<const free_bulk_execute, F, N>
@@ -127,7 +127,7 @@ struct bulk_execute_free<const free_bulk_execute, F, N>
   typedef sender result_type;
 };
 
-#endif // !defined(ASIO_HAS_DEDUCED_SUBMIT_FREE_TRAIT)
+#endif // !defined(ASIO_HAS_DEDUCED_BULK_EXECUTE_FREE_TRAIT)
 
 } // namespace traits
 } // namespace asio

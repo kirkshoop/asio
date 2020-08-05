@@ -549,8 +549,6 @@
 /boost/asio/traits/static_query.hpp
 /boost/asio/traits/static_require_concept.hpp
 /boost/asio/traits/static_require.hpp
-/boost/asio/traits/submit_free.hpp
-/boost/asio/traits/submit_member.hpp
 /boost/asio/ts/
 /boost/asio/ts/buffer.hpp
 /boost/asio/ts/executor.hpp

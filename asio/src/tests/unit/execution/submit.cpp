@@ -56,33 +56,6 @@ struct no_submit_2 : exec::sender_base
 {
 };
 
-struct no_submit_3
-{
-  template <typename R>
-  void submit(ASIO_MOVE_ARG(R) r)
-  {
-    (void)r;
-  }
-};
-
-#if !defined(ASIO_HAS_DEDUCED_SUBMIT_MEMBER_TRAIT)
-
-namespace asio {
-namespace traits {
-
-template <typename R>
-struct submit_member<no_submit_3, R>
-{
-  ASIO_STATIC_CONSTEXPR(bool, is_valid = true);
-  ASIO_STATIC_CONSTEXPR(bool, is_noexcept = false);
-  typedef void result_type;
-};
-
-} // namespace traits
-} // namespace asio
-
-#endif // !defined(ASIO_HAS_DEDUCED_SUBMIT_MEMBER_TRAIT)
-
 struct const_member_submit : exec::sender_base
 {
   const_member_submit()
@@ -98,30 +71,13 @@ struct const_member_submit : exec::sender_base
   }
 
   template <typename R>
-  void submit(ASIO_MOVE_ARG(R) r) const
+  friend
+  void tag_invoke(decltype(exec::submit), const const_member_submit&, ASIO_MOVE_ARG(R) r)
   {
     (void)r;
     ++call_count;
   }
 };
-
-namespace asio {
-namespace traits {
-
-#if !defined(ASIO_HAS_DEDUCED_SUBMIT_MEMBER_TRAIT)
-
-template <typename R>
-struct submit_member<const const_member_submit, R>
-{
-  ASIO_STATIC_CONSTEXPR(bool, is_valid = true);
-  ASIO_STATIC_CONSTEXPR(bool, is_noexcept = false);
-  typedef void result_type;
-};
-
-#endif // !defined(ASIO_HAS_DEDUCED_SUBMIT_MEMBER_TRAIT)
-
-} // namespace traits
-} // namespace asio
 
 struct free_submit_const_receiver : exec::sender_base
 {
@@ -138,31 +94,13 @@ struct free_submit_const_receiver : exec::sender_base
   }
 
   template <typename R>
-  friend void submit(
+  friend void tag_invoke(decltype(exec::submit),
       const free_submit_const_receiver&, ASIO_MOVE_ARG(R) r)
   {
     (void)r;
     ++call_count;
   }
 };
-
-namespace asio {
-namespace traits {
-
-#if !defined(ASIO_HAS_DEDUCED_SUBMIT_FREE_TRAIT)
-
-template <typename R>
-struct submit_free<const free_submit_const_receiver, R>
-{
-  ASIO_STATIC_CONSTEXPR(bool, is_valid = true);
-  ASIO_STATIC_CONSTEXPR(bool, is_noexcept = false);
-  typedef void result_type;
-};
-
-#endif // !defined(ASIO_HAS_DEDUCED_SUBMIT_FREE_TRAIT)
-
-} // namespace traits
-} // namespace asio
 
 struct non_const_member_submit : exec::sender_base
 {
@@ -179,30 +117,13 @@ struct non_const_member_submit : exec::sender_base
   }
 
   template <typename R>
-  void submit(ASIO_MOVE_ARG(R) r)
+  friend
+  void tag_invoke(decltype(exec::submit), non_const_member_submit&, ASIO_MOVE_ARG(R) r)
   {
     (void)r;
     ++call_count;
   }
 };
-
-namespace asio {
-namespace traits {
-
-#if !defined(ASIO_HAS_DEDUCED_SUBMIT_MEMBER_TRAIT)
-
-template <typename R>
-struct submit_member<non_const_member_submit, R>
-{
-  ASIO_STATIC_CONSTEXPR(bool, is_valid = true);
-  ASIO_STATIC_CONSTEXPR(bool, is_noexcept = false);
-  typedef void result_type;
-};
-
-#endif // !defined(ASIO_HAS_DEDUCED_SUBMIT_MEMBER_TRAIT)
-
-} // namespace traits
-} // namespace asio
 
 struct free_submit_non_const_receiver : exec::sender_base
 {
@@ -219,31 +140,13 @@ struct free_submit_non_const_receiver : exec::sender_base
   }
 
   template <typename R>
-  friend void submit(
+  friend void tag_invoke(decltype(exec::submit),
       free_submit_non_const_receiver&, ASIO_MOVE_ARG(R) r)
   {
     (void)r;
     ++call_count;
   }
 };
-
-namespace asio {
-namespace traits {
-
-#if !defined(ASIO_HAS_DEDUCED_SUBMIT_FREE_TRAIT)
-
-template <typename R>
-struct submit_free<free_submit_non_const_receiver, R>
-{
-  ASIO_STATIC_CONSTEXPR(bool, is_valid = true);
-  ASIO_STATIC_CONSTEXPR(bool, is_noexcept = false);
-  typedef void result_type;
-};
-
-#endif // !defined(ASIO_HAS_DEDUCED_SUBMIT_FREE_TRAIT)
-
-} // namespace traits
-} // namespace asio
 
 struct receiver
 {
@@ -380,14 +283,6 @@ void test_can_submit()
   ASIO_CONSTEXPR bool b4 = exec::can_submit<
       const no_submit_2&, receiver>::value;
   ASIO_CHECK(b4 == false);
-
-  ASIO_CONSTEXPR bool b5 = exec::can_submit<
-      no_submit_3&, receiver>::value;
-  ASIO_CHECK(b5 == false);
-
-  ASIO_CONSTEXPR bool b6 = exec::can_submit<
-      const no_submit_3&, receiver>::value;
-  ASIO_CHECK(b6 == false);
 
   ASIO_CONSTEXPR bool b7 = exec::can_submit<
       const_member_submit&, receiver>::value;

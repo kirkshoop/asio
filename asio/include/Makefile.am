@@ -530,8 +530,6 @@ nobase_include_HEADERS = \
 	asio/traits/static_query.hpp \
 	asio/traits/static_require.hpp \
 	asio/traits/static_require_concept.hpp \
-	asio/traits/submit_free.hpp \
-	asio/traits/submit_member.hpp \
 	asio/traits/tag_invoke_free.hpp \
 	asio/traits/tag_invoke_member.hpp \
 	asio/ts/buffer.hpp \
