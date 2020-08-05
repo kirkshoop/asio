@@ -525,8 +525,6 @@ nobase_include_HEADERS = \
 	asio/traits/set_error_member.hpp \
 	asio/traits/set_value_free.hpp \
 	asio/traits/set_value_member.hpp \
-	asio/traits/start_free.hpp \
-	asio/traits/start_member.hpp \
 	asio/traits/static_query.hpp \
 	asio/traits/static_require.hpp \
 	asio/traits/static_require_concept.hpp \

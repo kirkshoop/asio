@@ -24,55 +24,12 @@ struct not_an_operation_state_1
 {
 };
 
-struct not_an_operation_state_2
-{
-  void start()
-  {
-  }
-};
-
-namespace asio {
-namespace traits {
-
-#if !defined(ASIO_HAS_DEDUCED_START_MEMBER_TRAIT)
-
-template <>
-struct start_member<not_an_operation_state_2>
-{
-  ASIO_STATIC_CONSTEXPR(bool, is_valid = true);
-  ASIO_STATIC_CONSTEXPR(bool, is_noexcept = false);
-  typedef void result_type;
-};
-
-#endif // !defined(ASIO_HAS_DEDUCED_START_MEMBER_TRAIT)
-
-} // namespace traits
-} // namespace asio
-
 struct operation_state
 {
-  void start() ASIO_NOEXCEPT
+  friend void tag_invoke(decltype(asio::execution::start), operation_state&) ASIO_NOEXCEPT
   {
   }
 };
-
-namespace asio {
-namespace traits {
-
-#if !defined(ASIO_HAS_DEDUCED_START_MEMBER_TRAIT)
-
-template <>
-struct start_member<operation_state>
-{
-  ASIO_STATIC_CONSTEXPR(bool, is_valid = true);
-  ASIO_STATIC_CONSTEXPR(bool, is_noexcept = true);
-  typedef void result_type;
-};
-
-#endif // !defined(ASIO_HAS_DEDUCED_START_MEMBER_TRAIT)
-
-} // namespace traits
-} // namespace asio
 
 void is_operation_state_test()
 {
@@ -84,11 +41,6 @@ void is_operation_state_test()
   ASIO_CHECK((
       !asio::execution::is_operation_state<
         not_an_operation_state_1
-      >::value));
-
-  ASIO_CHECK((
-      !asio::execution::is_operation_state<
-        not_an_operation_state_2
       >::value));
 
   ASIO_CHECK((

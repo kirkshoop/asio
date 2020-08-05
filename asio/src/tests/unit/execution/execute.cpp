@@ -15,9 +15,10 @@
 
 // Test that header file is self-contained.
 #include "asio/execution/execute.hpp"
-#include "asio/execution/sender.hpp"
-#include "asio/execution/submit.hpp"
 
+#include "asio/execution/sender.hpp"
+#include "asio/execution/start.hpp"
+#include "asio/execution/submit.hpp"
 #include "asio/execution/invocable_archetype.hpp"
 #include "../unit_test.hpp"
 
@@ -189,28 +190,10 @@ struct execute_free<const free_execute_non_const_executor&, F>
 
 struct operation_state
 {
-  void start() ASIO_NOEXCEPT
+  friend void tag_invoke(decltype(exec::start), operation_state&) ASIO_NOEXCEPT
   {
   }
 };
-
-namespace asio {
-namespace traits {
-
-#if !defined(ASIO_HAS_DEDUCED_START_MEMBER_TRAIT)
-
-template <>
-struct start_member<operation_state>
-{
-  ASIO_STATIC_CONSTEXPR(bool, is_valid = true);
-  ASIO_STATIC_CONSTEXPR(bool, is_noexcept = true);
-  typedef void result_type;
-};
-
-#endif // !defined(ASIO_HAS_DEDUCED_START_MEMBER_TRAIT)
-
-} // namespace traits
-} // namespace asio
 
 struct sender : exec::sender_base
 {

@@ -98,28 +98,10 @@ struct equality_comparable<executor>
 
 struct operation_state
 {
-  void start() ASIO_NOEXCEPT
+  friend void tag_invoke(decltype(exec::start), operation_state&) ASIO_NOEXCEPT
   {
   }
 };
-
-namespace asio {
-namespace traits {
-
-#if !defined(ASIO_HAS_DEDUCED_START_MEMBER_TRAIT)
-
-template <>
-struct start_member<operation_state>
-{
-  ASIO_STATIC_CONSTEXPR(bool, is_valid = true);
-  ASIO_STATIC_CONSTEXPR(bool, is_noexcept = true);
-  typedef void result_type;
-};
-
-#endif // !defined(ASIO_HAS_DEDUCED_START_MEMBER_TRAIT)
-
-} // namespace traits
-} // namespace asio
 
 struct typed_sender
 {

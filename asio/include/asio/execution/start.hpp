@@ -17,8 +17,7 @@
 
 #include "asio/detail/config.hpp"
 #include "asio/detail/type_traits.hpp"
-#include "asio/traits/start_member.hpp"
-#include "asio/traits/start_free.hpp"
+#include "asio/tag_invokes/tag_invoke.hpp"
 
 #include "asio/detail/push_options.hpp"
 
@@ -31,17 +30,13 @@ namespace execution {
 /// its associated operation.
 /**
  * The name <tt>execution::start</tt> denotes a customisation point object.
- * The expression <tt>execution::start(R)</tt> for some subexpression
- * <tt>R</tt> is expression-equivalent to:
+ * The expression <tt>execution::start(O)</tt> for some subexpression
+ * <tt>O</tt> is expression-equivalent to:
  *
- * @li <tt>R.start()</tt>, if that expression is valid.
+ * @li <tt>start(O)</tt>, if that expression is valid, and if the expression 
+ *   <tt>asio::tag_invokes::tag_invoke(start, O)</tt> is valid.
  *
- * @li Otherwise, <tt>start(R)</tt>, if that expression is valid, with
- * overload resolution performed in a context that includes the declaration
- * <tt>void start();</tt> and that does not include a declaration of
- * <tt>execution::start</tt>.
- *
- * @li Otherwise, <tt>execution::start(R)</tt> is ill-formed.
+ * @li Otherwise, <tt>execution::start(O)</tt> is ill-formed.
  */
 inline constexpr unspecified start = unspecified;
 
@@ -49,8 +44,8 @@ inline constexpr unspecified start = unspecified;
 /// well-formed.
 /**
  * Class template @c can_start is a trait that is derived from
- * @c true_type if the expression <tt>execution::start(std::declval<R>(),
- * std::declval<E>())</tt> is well formed; otherwise @c false_type.
+ * @c true_type if the expression <tt>execution::start(std::declval<O>())</tt> 
+ * is well formed; otherwise @c false_type.
  */
 template <typename R>
 struct can_start :
@@ -68,125 +63,47 @@ namespace asio_execution_start_fn {
 using asio::decay;
 using asio::declval;
 using asio::enable_if;
-using asio::traits::start_free;
-using asio::traits::start_member;
-
-void start();
-
-enum overload_type
-{
-  call_member,
-  call_free,
-  ill_formed
-};
-
-template <typename R, typename = void>
-struct call_traits
-{
-  ASIO_STATIC_CONSTEXPR(overload_type, overload = ill_formed);
-  ASIO_STATIC_CONSTEXPR(bool, is_noexcept = false);
-  typedef void result_type;
-};
-
-template <typename R>
-struct call_traits<R,
-  typename enable_if<
-    (
-      start_member<R>::is_valid
-    )
-  >::type> :
-  start_member<R>
-{
-  ASIO_STATIC_CONSTEXPR(overload_type, overload = call_member);
-};
-
-template <typename R>
-struct call_traits<R,
-  typename enable_if<
-    (
-      !start_member<R>::is_valid
-      &&
-      start_free<R>::is_valid
-    )
-  >::type> :
-  start_free<R>
-{
-  ASIO_STATIC_CONSTEXPR(overload_type, overload = call_free);
-};
+using asio::tag_invokes::can_tag_invoke;
+using asio::tag_invokes::tag_invoke_result;
+using asio::tag_invokes::is_nothrow_tag_invoke;
 
 struct impl
 {
 #if defined(ASIO_HAS_MOVE)
-  template <typename R>
+  template <typename O>
   ASIO_CONSTEXPR typename enable_if<
-    call_traits<R>::overload == call_member,
-    typename call_traits<R>::result_type
+    can_tag_invoke<impl, O>::value,
+    typename tag_invoke_result<impl, O>::type
   >::type
-  operator()(R&& r) const
+  operator()(O&& o) const
     ASIO_NOEXCEPT_IF((
-      call_traits<R>::is_noexcept))
+      is_nothrow_tag_invoke<impl, O>::value))
   {
-    return ASIO_MOVE_CAST(R)(r).start();
-  }
-
-  template <typename R>
-  ASIO_CONSTEXPR typename enable_if<
-    call_traits<R>::overload == call_free,
-    typename call_traits<R>::result_type
-  >::type
-  operator()(R&& r) const
-    ASIO_NOEXCEPT_IF((
-      call_traits<R>::is_noexcept))
-  {
-    return start(ASIO_MOVE_CAST(R)(r));
+    return asio::tag_invokes::tag_invoke(*this, ASIO_MOVE_CAST(O)(o));
   }
 #else // defined(ASIO_HAS_MOVE)
-  template <typename R>
+  template <typename O>
   ASIO_CONSTEXPR typename enable_if<
-    call_traits<R&>::overload == call_member,
-    typename call_traits<R&>::result_type
+    can_tag_invoke<impl, O&>::value,
+    typename tag_invoke_result<impl, O&>::type
   >::type
-  operator()(R& r) const
+  operator()(O& o) const
     ASIO_NOEXCEPT_IF((
-      call_traits<R&>::is_noexcept))
+      is_nothrow_tag_invoke<impl, O&>::value))
   {
-    return r.start();
+    return asio::tag_invokes::tag_invoke(*this, o);
   }
 
-  template <typename R>
+  template <typename O>
   ASIO_CONSTEXPR typename enable_if<
-    call_traits<const R&>::overload == call_member,
-    typename call_traits<const R&>::result_type
+    can_tag_invoke<impl, const O&>::value,
+    typename tag_invoke_result<impl, const O&>::type
   >::type
-  operator()(const R& r) const
+  operator()(const O& o) const
     ASIO_NOEXCEPT_IF((
-      call_traits<const R&>::is_noexcept))
+      is_nothrow_tag_invoke<impl, const O&>::value))
   {
-    return r.start();
-  }
-
-  template <typename R>
-  ASIO_CONSTEXPR typename enable_if<
-    call_traits<R&>::overload == call_free,
-    typename call_traits<R&>::result_type
-  >::type
-  operator()(R& r) const
-    ASIO_NOEXCEPT_IF((
-      call_traits<R&>::is_noexcept))
-  {
-    return start(r);
-  }
-
-  template <typename R>
-  ASIO_CONSTEXPR typename enable_if<
-    call_traits<const R&>::overload == call_free,
-    typename call_traits<const R&>::result_type
-  >::type
-  operator()(const R& r) const
-    ASIO_NOEXCEPT_IF((
-      call_traits<const R&>::is_noexcept))
-  {
-    return start(r);
+    return asio::tag_invokes::tag_invoke(*this, o);
   }
 #endif // defined(ASIO_HAS_MOVE)
 };
@@ -210,33 +127,32 @@ static ASIO_CONSTEXPR const asio_execution_start_fn::impl&
 
 } // namespace
 
-template <typename R>
+template <typename O>
 struct can_start :
   integral_constant<bool,
-    asio_execution_start_fn::call_traits<R>::overload !=
-      asio_execution_start_fn::ill_formed>
+    asio::tag_invokes::can_tag_invoke<asio_execution_start_fn::impl, O>::value>
 {
 };
 
 #if defined(ASIO_HAS_VARIABLE_TEMPLATES)
 
-template <typename R>
-constexpr bool can_start_v = can_start<R>::value;
+template <typename O>
+constexpr bool can_start_v = can_start<O>::value;
 
 #endif // defined(ASIO_HAS_VARIABLE_TEMPLATES)
 
-template <typename R>
+template <typename O>
 struct is_nothrow_start :
   integral_constant<bool,
-    asio_execution_start_fn::call_traits<R>::is_noexcept>
+    asio::tag_invokes::is_nothrow_tag_invoke<asio_execution_start_fn::impl, O>::value>
 {
 };
 
 #if defined(ASIO_HAS_VARIABLE_TEMPLATES)
 
-template <typename R>
+template <typename O>
 constexpr bool is_nothrow_start_v
-  = is_nothrow_start<R>::value;
+  = is_nothrow_start<O>::value;
 
 #endif // defined(ASIO_HAS_VARIABLE_TEMPLATES)
 

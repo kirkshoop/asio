@@ -21,13 +21,17 @@
 #include "asio/execution/detail/as_invocable.hpp"
 #include "asio/execution/execute.hpp"
 #include "asio/execution/set_error.hpp"
-#include "asio/traits/start_member.hpp"
+#include "asio/execution/start.hpp"
 
 #include "asio/detail/push_options.hpp"
 
 namespace asio {
 namespace execution {
 namespace detail {
+
+using asio::enable_if;
+using asio::is_same;
+using asio::remove_cvref;
 
 template <typename Executor, typename Receiver>
 struct as_operation
@@ -48,7 +52,7 @@ struct as_operation
   {
   }
 
-  void start() ASIO_NOEXCEPT
+  void tag_invoke(decltype(asio::execution::start)) ASIO_NOEXCEPT
   {
 #if !defined(ASIO_NO_EXCEPTIONS)
     try
@@ -82,22 +86,6 @@ struct as_operation
 
 } // namespace detail
 } // namespace execution
-namespace traits {
-
-#if !defined(ASIO_HAS_DEDUCED_START_MEMBER_TRAIT)
-
-template <typename Executor, typename Receiver>
-struct start_member<
-    asio::execution::detail::as_operation<Executor, Receiver> >
-{
-  ASIO_STATIC_CONSTEXPR(bool, is_valid = true);
-  ASIO_STATIC_CONSTEXPR(bool, is_noexcept = true);
-  typedef void result_type;
-};
-
-#endif // !defined(ASIO_HAS_DEDUCED_START_MEMBER_TRAIT)
-
-} // namespace traits
 } // namespace asio
 
 #include "asio/detail/pop_options.hpp"
