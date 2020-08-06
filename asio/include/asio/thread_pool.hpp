@@ -791,21 +791,6 @@ struct execute_member<
 
 #endif // !defined(ASIO_HAS_DEDUCED_EXECUTE_MEMBER_TRAIT)
 
-#if !defined(ASIO_HAS_DEDUCED_SCHEDULE_MEMBER_TRAIT)
-
-template <typename Allocator, unsigned int Bits>
-struct schedule_member<
-    const asio::thread_pool::basic_executor_type<Allocator, Bits>
-  >
-{
-  ASIO_STATIC_CONSTEXPR(bool, is_valid = true);
-  ASIO_STATIC_CONSTEXPR(bool, is_noexcept = false);
-  typedef asio::thread_pool::basic_executor_type<
-      Allocator, Bits> result_type;
-};
-
-#endif // !defined(ASIO_HAS_DEDUCED_SCHEDULE_MEMBER_TRAIT)
-
 #if !defined(ASIO_HAS_DEDUCED_REQUIRE_MEMBER_TRAIT)
 
 template <typename Allocator, unsigned int Bits>

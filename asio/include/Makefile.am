@@ -517,8 +517,6 @@ nobase_include_HEADERS = \
 	asio/traits/require_concept_member.hpp \
 	asio/traits/require_free.hpp \
 	asio/traits/require_member.hpp \
-	asio/traits/schedule_free.hpp \
-	asio/traits/schedule_member.hpp \
 	asio/traits/set_done_free.hpp \
 	asio/traits/set_done_member.hpp \
 	asio/traits/set_error_free.hpp \

@@ -4926,8 +4926,6 @@
 /include/asio/traits/require_concept_member.hpp
 /include/asio/traits/require_free.hpp
 /include/asio/traits/require_member.hpp
-/include/asio/traits/schedule_free.hpp
-/include/asio/traits/schedule_member.hpp
 /include/asio/traits/set_done_free.hpp
 /include/asio/traits/set_done_member.hpp
 /include/asio/traits/set_error_free.hpp

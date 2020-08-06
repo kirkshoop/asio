@@ -58,111 +58,23 @@ struct no_schedule
 {
 };
 
-struct const_member_schedule
-{
-  sender schedule() const ASIO_NOEXCEPT
-  {
-    return sender();
-  }
-};
-
-#if !defined(ASIO_HAS_DEDUCED_SCHEDULE_MEMBER_TRAIT)
-
-namespace asio {
-namespace traits {
-
-template <>
-struct schedule_member<const const_member_schedule>
-{
-  ASIO_STATIC_CONSTEXPR(bool, is_valid = true);
-  ASIO_STATIC_CONSTEXPR(bool, is_noexcept = true);
-  typedef sender result_type;
-};
-
-} // namespace traits
-} // namespace asio
-
-#endif // !defined(ASIO_HAS_DEDUCED_SCHEDULE_MEMBER_TRAIT)
-
 struct free_schedule_const_receiver
 {
-  friend sender schedule(
+  friend sender tag_invoke(decltype(exec::schedule),
       const free_schedule_const_receiver&) ASIO_NOEXCEPT
   {
     return sender();
   }
 };
 
-#if !defined(ASIO_HAS_DEDUCED_SCHEDULE_FREE_TRAIT)
-
-namespace asio {
-namespace traits {
-
-template <>
-struct schedule_free<const free_schedule_const_receiver>
-{
-  ASIO_STATIC_CONSTEXPR(bool, is_valid = true);
-  ASIO_STATIC_CONSTEXPR(bool, is_noexcept = true);
-  typedef sender result_type;
-};
-
-} // namespace traits
-} // namespace asio
-
-#endif // !defined(ASIO_HAS_DEDUCED_SCHEDULE_FREE_TRAIT)
-
-struct non_const_member_schedule
-{
-  sender schedule() ASIO_NOEXCEPT
-  {
-    return sender();
-  }
-};
-
-#if !defined(ASIO_HAS_DEDUCED_SCHEDULE_MEMBER_TRAIT)
-
-namespace asio {
-namespace traits {
-
-template <>
-struct schedule_member<non_const_member_schedule>
-{
-  ASIO_STATIC_CONSTEXPR(bool, is_valid = true);
-  ASIO_STATIC_CONSTEXPR(bool, is_noexcept = true);
-  typedef sender result_type;
-};
-
-} // namespace traits
-} // namespace asio
-
-#endif // !defined(ASIO_HAS_DEDUCED_SCHEDULE_MEMBER_TRAIT)
-
 struct free_schedule_non_const_receiver
 {
-  friend sender schedule(
+  friend sender tag_invoke(decltype(exec::schedule),
       free_schedule_non_const_receiver&) ASIO_NOEXCEPT
   {
     return sender();
   }
 };
-
-#if !defined(ASIO_HAS_DEDUCED_SCHEDULE_FREE_TRAIT)
-
-namespace asio {
-namespace traits {
-
-template <>
-struct schedule_free<free_schedule_non_const_receiver>
-{
-  ASIO_STATIC_CONSTEXPR(bool, is_valid = true);
-  ASIO_STATIC_CONSTEXPR(bool, is_noexcept = true);
-  typedef sender result_type;
-};
-
-} // namespace traits
-} // namespace asio
-
-#endif // !defined(ASIO_HAS_DEDUCED_SCHEDULE_FREE_TRAIT)
 
 struct executor
 {
@@ -236,14 +148,6 @@ void test_can_schedule()
       const no_schedule&>::value;
   ASIO_CHECK(b2 == false);
 
-  ASIO_CONSTEXPR bool b3 = exec::can_schedule<
-      const_member_schedule&>::value;
-  ASIO_CHECK(b3 == true);
-
-  ASIO_CONSTEXPR bool b4 = exec::can_schedule<
-      const const_member_schedule&>::value;
-  ASIO_CHECK(b4 == true);
-
   ASIO_CONSTEXPR bool b5 = exec::can_schedule<
       free_schedule_const_receiver&>::value;
   ASIO_CHECK(b5 == true);
@@ -251,14 +155,6 @@ void test_can_schedule()
   ASIO_CONSTEXPR bool b6 = exec::can_schedule<
       const free_schedule_const_receiver&>::value;
   ASIO_CHECK(b6 == true);
-
-  ASIO_CONSTEXPR bool b7 = exec::can_schedule<
-      non_const_member_schedule&>::value;
-  ASIO_CHECK(b7 == true);
-
-  ASIO_CONSTEXPR bool b8 = exec::can_schedule<
-      const non_const_member_schedule&>::value;
-  ASIO_CHECK(b8 == false);
 
   ASIO_CONSTEXPR bool b9 = exec::can_schedule<
       free_schedule_non_const_receiver&>::value;
@@ -360,26 +256,6 @@ struct set_done_member<receiver>
 void test_schedule()
 {
   int count = 0;
-  const_member_schedule ex1 = {};
-  exec::submit(
-      exec::schedule(ex1),
-      receiver(&count));
-  ASIO_CHECK(count == 1);
-
-  count = 0;
-  const const_member_schedule ex2 = {};
-  exec::submit(
-      exec::schedule(ex2),
-      receiver(&count));
-  ASIO_CHECK(count == 1);
-
-  count = 0;
-  exec::submit(
-      exec::schedule(const_member_schedule()),
-      receiver(&count));
-  ASIO_CHECK(count == 1);
-
-  count = 0;
   free_schedule_const_receiver ex3 = {};
   exec::submit(
       exec::schedule(ex3),
@@ -396,13 +272,6 @@ void test_schedule()
   count = 0;
   exec::submit(
       exec::schedule(free_schedule_const_receiver()),
-      receiver(&count));
-  ASIO_CHECK(count == 1);
-
-  count = 0;
-  non_const_member_schedule ex5 = {};
-  exec::submit(
-      exec::schedule(ex5),
       receiver(&count));
   ASIO_CHECK(count == 1);
 

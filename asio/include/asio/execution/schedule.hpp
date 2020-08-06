@@ -18,8 +18,7 @@
 #include "asio/detail/config.hpp"
 #include "asio/detail/type_traits.hpp"
 #include "asio/execution/executor.hpp"
-#include "asio/traits/schedule_member.hpp"
-#include "asio/traits/schedule_free.hpp"
+#include "asio/tag_invokes/tag_invoke.hpp"
 
 #include "asio/detail/push_options.hpp"
 
@@ -35,13 +34,9 @@ namespace execution {
  * <tt>decltype((s))</tt> is <tt>S</tt>. The expression
  * <tt>execution::schedule(s)</tt> is expression-equivalent to:
  *
- * @li <tt>s.schedule()</tt>, if that expression is valid and its type models
- *   <tt>sender</tt>.
- *
- * @li Otherwise, <tt>schedule(s)</tt>, if that expression is valid and its
- *   type models <tt>sender</tt> with overload resolution performed in a context
- *   that includes the declaration <tt>void schedule();</tt> and that does not
- *   include a declaration of <tt>execution::schedule</tt>.
+ * @li <tt>schedule(s)</tt>, if that expression is valid and its
+ *   type models <tt>sender</tt>, and if the expression 
+ *   <tt>asio::tag_invokes::tag_invoke(schedule, s)</tt> is valid.
  *
  * @li Otherwise, <tt>S</tt> if <tt>S</tt> satisfies <tt>executor</tt>.
  *
@@ -73,16 +68,16 @@ using asio::decay;
 using asio::declval;
 using asio::enable_if;
 using asio::execution::is_executor;
-using asio::traits::schedule_free;
-using asio::traits::schedule_member;
+using asio::tag_invokes::can_tag_invoke;
+using asio::tag_invokes::tag_invoke_result;
+using asio::tag_invokes::is_nothrow_tag_invoke;
 
-void schedule();
+struct impl;
 
 enum overload_type
 {
   identity,
-  call_member,
-  call_free,
+  call_tag_invoke,
   ill_formed
 };
 
@@ -98,35 +93,21 @@ template <typename S>
 struct call_traits<S,
   typename enable_if<
     (
-      schedule_member<S>::is_valid
+      can_tag_invoke<impl, S>::value
     )
-  >::type> :
-  schedule_member<S>
+  >::type>
 {
-  ASIO_STATIC_CONSTEXPR(overload_type, overload = call_member);
+  ASIO_STATIC_CONSTEXPR(overload_type, overload = call_tag_invoke);
+  ASIO_STATIC_CONSTEXPR(bool, is_valid = true);
+  ASIO_STATIC_CONSTEXPR(bool, is_noexcept = (is_nothrow_tag_invoke<impl, S>::value));
+  typedef typename tag_invoke_result<impl, S>::type result_type;
 };
 
 template <typename S>
 struct call_traits<S,
   typename enable_if<
     (
-      !schedule_member<S>::is_valid
-      &&
-      schedule_free<S>::is_valid
-    )
-  >::type> :
-  schedule_free<S>
-{
-  ASIO_STATIC_CONSTEXPR(overload_type, overload = call_free);
-};
-
-template <typename S>
-struct call_traits<S,
-  typename enable_if<
-    (
-      !schedule_member<S>::is_valid
-      &&
-      !schedule_free<S>::is_valid
+      !can_tag_invoke<impl, S>::value
       &&
       is_executor<typename decay<S>::type>::value
     )
@@ -159,74 +140,38 @@ struct impl
 #if defined(ASIO_HAS_MOVE)
   template <typename S>
   ASIO_CONSTEXPR typename enable_if<
-    call_traits<S>::overload == call_member,
+    call_traits<S>::overload == call_tag_invoke,
     typename call_traits<S>::result_type
   >::type
   operator()(S&& s) const
     ASIO_NOEXCEPT_IF((
       call_traits<S>::is_noexcept))
   {
-    return ASIO_MOVE_CAST(S)(s).schedule();
-  }
-
-  template <typename S>
-  ASIO_CONSTEXPR typename enable_if<
-    call_traits<S>::overload == call_free,
-    typename call_traits<S>::result_type
-  >::type
-  operator()(S&& s) const
-    ASIO_NOEXCEPT_IF((
-      call_traits<S>::is_noexcept))
-  {
-    return schedule(ASIO_MOVE_CAST(S)(s));
+    return asio::tag_invokes::tag_invoke(*this, ASIO_MOVE_CAST(S)(s));
   }
 #else // defined(ASIO_HAS_MOVE)
   template <typename S>
   ASIO_CONSTEXPR typename enable_if<
-    call_traits<S&>::overload == call_member,
+    call_traits<S&>::overload == call_tag_invoke,
     typename call_traits<S&>::result_type
   >::type
   operator()(S& s) const
     ASIO_NOEXCEPT_IF((
       call_traits<S&>::is_noexcept))
   {
-    return s.schedule();
+    return asio::tag_invokes::tag_invoke(*this, ASIO_MOVE_CAST(S)(s));
   }
 
   template <typename S>
   ASIO_CONSTEXPR typename enable_if<
-    call_traits<const S&>::overload == call_member,
+    call_traits<const S&>::overload == call_tag_invoke,
     typename call_traits<const S&>::result_type
   >::type
   operator()(const S& s) const
     ASIO_NOEXCEPT_IF((
       call_traits<const S&>::is_noexcept))
   {
-    return s.schedule();
-  }
-
-  template <typename S>
-  ASIO_CONSTEXPR typename enable_if<
-    call_traits<S&>::overload == call_free,
-    typename call_traits<S&>::result_type
-  >::type
-  operator()(S& s) const
-    ASIO_NOEXCEPT_IF((
-      call_traits<S&>::is_noexcept))
-  {
-    return schedule(s);
-  }
-
-  template <typename S>
-  ASIO_CONSTEXPR typename enable_if<
-    call_traits<const S&>::overload == call_free,
-    typename call_traits<const S&>::result_type
-  >::type
-  operator()(const S& s) const
-    ASIO_NOEXCEPT_IF((
-      call_traits<const S&>::is_noexcept))
-  {
-    return schedule(s);
+    return asio::tag_invokes::tag_invoke(*this, ASIO_MOVE_CAST(S)(s));
   }
 #endif // defined(ASIO_HAS_MOVE)
 };
