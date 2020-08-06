@@ -536,8 +536,6 @@
 /boost/asio/traits/require_concept_member.hpp
 /boost/asio/traits/require_free.hpp
 /boost/asio/traits/require_member.hpp
-/boost/asio/traits/set_value_free.hpp
-/boost/asio/traits/set_value_member.hpp
 /boost/asio/traits/static_query.hpp
 /boost/asio/traits/static_require_concept.hpp
 /boost/asio/traits/static_require.hpp

@@ -27,122 +27,18 @@ struct no_set_value
 {
 };
 
-struct const_member_set_value_0
-{
-  void set_value() const
-  {
-    ++call_count;
-  }
-};
-
-#if !defined(ASIO_HAS_DEDUCED_SET_VALUE_MEMBER_TRAIT)
-
-namespace asio {
-namespace traits {
-
-template <>
-struct set_value_member<const const_member_set_value_0, void()>
-{
-  ASIO_STATIC_CONSTEXPR(bool, is_valid = true);
-  ASIO_STATIC_CONSTEXPR(bool, is_noexcept = false);
-  typedef void result_type;
-};
-
-} // namespace traits
-} // namespace asio
-
-#endif // !defined(ASIO_HAS_DEDUCED_SET_VALUE_MEMBER_TRAIT)
-
-struct const_member_set_value_1
-{
-  template <typename V1>
-  void set_value(ASIO_MOVE_ARG(V1) v1) const
-  {
-    typename asio::decay<V1>::type tmp(ASIO_MOVE_CAST(V1)(v1));
-    (void)tmp;
-    ++call_count;
-  }
-};
-
-#if !defined(ASIO_HAS_DEDUCED_SET_VALUE_MEMBER_TRAIT)
-
-namespace asio {
-namespace traits {
-
-template <typename V1>
-struct set_value_member<const const_member_set_value_1, void(V1)>
-{
-  ASIO_STATIC_CONSTEXPR(bool, is_valid = true);
-  ASIO_STATIC_CONSTEXPR(bool, is_noexcept = false);
-  typedef void result_type;
-};
-
-} // namespace traits
-} // namespace asio
-
-#endif // !defined(ASIO_HAS_DEDUCED_SET_VALUE_MEMBER_TRAIT)
-
-struct const_member_set_value_2
-{
-  template <typename V1, typename V2>
-  void set_value(ASIO_MOVE_ARG(V1) v1, ASIO_MOVE_ARG(V2) v2) const
-  {
-    typename asio::decay<V1>::type tmp1(ASIO_MOVE_CAST(V1)(v1));
-    (void)tmp1;
-    typename asio::decay<V2>::type tmp2(ASIO_MOVE_CAST(V2)(v2));
-    (void)tmp2;
-    ++call_count;
-  }
-};
-
-#if !defined(ASIO_HAS_DEDUCED_SET_VALUE_MEMBER_TRAIT)
-
-namespace asio {
-namespace traits {
-
-template <typename V1, typename V2>
-struct set_value_member<const const_member_set_value_2, void(V1, V2)>
-{
-  ASIO_STATIC_CONSTEXPR(bool, is_valid = true);
-  ASIO_STATIC_CONSTEXPR(bool, is_noexcept = false);
-  typedef void result_type;
-};
-
-} // namespace traits
-} // namespace asio
-
-#endif // !defined(ASIO_HAS_DEDUCED_SET_VALUE_MEMBER_TRAIT)
-
 struct free_set_value_const_receiver_0
 {
-  friend void set_value(const free_set_value_const_receiver_0&)
+  friend void tag_invoke(decltype(exec::set_value), const free_set_value_const_receiver_0&)
   {
     ++call_count;
   }
 };
-
-#if !defined(ASIO_HAS_DEDUCED_SET_VALUE_FREE_TRAIT)
-
-namespace asio {
-namespace traits {
-
-template <>
-struct set_value_free<const free_set_value_const_receiver_0, void()>
-{
-  ASIO_STATIC_CONSTEXPR(bool, is_valid = true);
-  ASIO_STATIC_CONSTEXPR(bool, is_noexcept = false);
-  typedef void result_type;
-};
-
-} // namespace traits
-} // namespace asio
-
-#endif // !defined(ASIO_HAS_DEDUCED_SET_VALUE_FREE_TRAIT)
 
 struct free_set_value_const_receiver_1
 {
   template <typename V1>
-  friend void set_value(const free_set_value_const_receiver_1&,
+  friend void tag_invoke(decltype(exec::set_value), const free_set_value_const_receiver_1&,
       ASIO_MOVE_ARG(V1) v1)
   {
     typename asio::decay<V1>::type tmp(ASIO_MOVE_CAST(V1)(v1));
@@ -150,29 +46,11 @@ struct free_set_value_const_receiver_1
     ++call_count;
   }
 };
-
-#if !defined(ASIO_HAS_DEDUCED_SET_VALUE_FREE_TRAIT)
-
-namespace asio {
-namespace traits {
-
-template <typename V1>
-struct set_value_free<const free_set_value_const_receiver_1, void(V1)>
-{
-  ASIO_STATIC_CONSTEXPR(bool, is_valid = true);
-  ASIO_STATIC_CONSTEXPR(bool, is_noexcept = false);
-  typedef void result_type;
-};
-
-} // namespace traits
-} // namespace asio
-
-#endif // !defined(ASIO_HAS_DEDUCED_SET_VALUE_FREE_TRAIT)
 
 struct free_set_value_const_receiver_2
 {
   template <typename V1, typename V2>
-  friend void set_value(const free_set_value_const_receiver_2&,
+  friend void tag_invoke(decltype(exec::set_value), const free_set_value_const_receiver_2&,
       ASIO_MOVE_ARG(V1) v1, ASIO_MOVE_ARG(V2) v2)
   {
     typename asio::decay<V1>::type tmp1(ASIO_MOVE_CAST(V1)(v1));
@@ -183,140 +61,18 @@ struct free_set_value_const_receiver_2
   }
 };
 
-#if !defined(ASIO_HAS_DEDUCED_SET_VALUE_FREE_TRAIT)
-
-namespace asio {
-namespace traits {
-
-template <typename V1, typename V2>
-struct set_value_free<const free_set_value_const_receiver_2, void(V1, V2)>
-{
-  ASIO_STATIC_CONSTEXPR(bool, is_valid = true);
-  ASIO_STATIC_CONSTEXPR(bool, is_noexcept = false);
-  typedef void result_type;
-};
-
-} // namespace traits
-} // namespace asio
-
-#endif // !defined(ASIO_HAS_DEDUCED_SET_VALUE_FREE_TRAIT)
-
-struct non_const_member_set_value_0
-{
-  void set_value()
-  {
-    ++call_count;
-  }
-};
-
-#if !defined(ASIO_HAS_DEDUCED_SET_VALUE_MEMBER_TRAIT)
-
-namespace asio {
-namespace traits {
-
-template <>
-struct set_value_member<non_const_member_set_value_0, void()>
-{
-  ASIO_STATIC_CONSTEXPR(bool, is_valid = true);
-  ASIO_STATIC_CONSTEXPR(bool, is_noexcept = false);
-  typedef void result_type;
-};
-
-} // namespace traits
-} // namespace asio
-
-#endif // !defined(ASIO_HAS_DEDUCED_SET_VALUE_MEMBER_TRAIT)
-
-struct non_const_member_set_value_1
-{
-  template <typename V1>
-  void set_value(ASIO_MOVE_ARG(V1) v1)
-  {
-    typename asio::decay<V1>::type tmp(ASIO_MOVE_CAST(V1)(v1));
-    (void)tmp;
-    ++call_count;
-  }
-};
-
-#if !defined(ASIO_HAS_DEDUCED_SET_VALUE_MEMBER_TRAIT)
-
-namespace asio {
-namespace traits {
-
-template <typename V1>
-struct set_value_member<non_const_member_set_value_1, void(V1)>
-{
-  ASIO_STATIC_CONSTEXPR(bool, is_valid = true);
-  ASIO_STATIC_CONSTEXPR(bool, is_noexcept = false);
-  typedef void result_type;
-};
-
-} // namespace traits
-} // namespace asio
-
-#endif // !defined(ASIO_HAS_DEDUCED_SET_VALUE_MEMBER_TRAIT)
-
-struct non_const_member_set_value_2
-{
-  template <typename V1, typename V2>
-  void set_value(ASIO_MOVE_ARG(V1) v1, ASIO_MOVE_ARG(V2) v2)
-  {
-    typename asio::decay<V1>::type tmp1(ASIO_MOVE_CAST(V1)(v1));
-    (void)tmp1;
-    typename asio::decay<V2>::type tmp2(ASIO_MOVE_CAST(V2)(v2));
-    (void)tmp2;
-    ++call_count;
-  }
-};
-
-#if !defined(ASIO_HAS_DEDUCED_SET_VALUE_MEMBER_TRAIT)
-
-namespace asio {
-namespace traits {
-
-template <typename V1, typename V2>
-struct set_value_member<non_const_member_set_value_2, void(V1, V2)>
-{
-  ASIO_STATIC_CONSTEXPR(bool, is_valid = true);
-  ASIO_STATIC_CONSTEXPR(bool, is_noexcept = false);
-  typedef void result_type;
-};
-
-} // namespace traits
-} // namespace asio
-
-#endif // !defined(ASIO_HAS_DEDUCED_SET_VALUE_MEMBER_TRAIT)
-
 struct free_set_value_non_const_receiver_0
 {
-  friend void set_value(free_set_value_non_const_receiver_0&)
+  friend void tag_invoke(decltype(exec::set_value), free_set_value_non_const_receiver_0&)
   {
     ++call_count;
   }
 };
-
-#if !defined(ASIO_HAS_DEDUCED_SET_VALUE_FREE_TRAIT)
-
-namespace asio {
-namespace traits {
-
-template <>
-struct set_value_free<free_set_value_non_const_receiver_0, void()>
-{
-  ASIO_STATIC_CONSTEXPR(bool, is_valid = true);
-  ASIO_STATIC_CONSTEXPR(bool, is_noexcept = false);
-  typedef void result_type;
-};
-
-} // namespace traits
-} // namespace asio
-
-#endif // !defined(ASIO_HAS_DEDUCED_SET_VALUE_FREE_TRAIT)
 
 struct free_set_value_non_const_receiver_1
 {
   template <typename V1>
-  friend void set_value(free_set_value_non_const_receiver_1&,
+  friend void tag_invoke(decltype(exec::set_value), free_set_value_non_const_receiver_1&,
       ASIO_MOVE_ARG(V1) v1)
   {
     typename asio::decay<V1>::type tmp(ASIO_MOVE_CAST(V1)(v1));
@@ -325,28 +81,10 @@ struct free_set_value_non_const_receiver_1
   }
 };
 
-#if !defined(ASIO_HAS_DEDUCED_SET_VALUE_FREE_TRAIT)
-
-namespace asio {
-namespace traits {
-
-template <typename V1>
-struct set_value_free<free_set_value_non_const_receiver_1, void(V1)>
-{
-  ASIO_STATIC_CONSTEXPR(bool, is_valid = true);
-  ASIO_STATIC_CONSTEXPR(bool, is_noexcept = false);
-  typedef void result_type;
-};
-
-} // namespace traits
-} // namespace asio
-
-#endif // !defined(ASIO_HAS_DEDUCED_SET_VALUE_FREE_TRAIT)
-
 struct free_set_value_non_const_receiver_2
 {
   template <typename V1, typename V2>
-  friend void set_value(free_set_value_non_const_receiver_2&,
+  friend void tag_invoke(decltype(exec::set_value), free_set_value_non_const_receiver_2&,
       ASIO_MOVE_ARG(V1) v1, ASIO_MOVE_ARG(V2) v2)
   {
     typename asio::decay<V1>::type tmp1(ASIO_MOVE_CAST(V1)(v1));
@@ -356,24 +94,6 @@ struct free_set_value_non_const_receiver_2
     ++call_count;
   }
 };
-
-#if !defined(ASIO_HAS_DEDUCED_SET_VALUE_FREE_TRAIT)
-
-namespace asio {
-namespace traits {
-
-template <typename V1, typename V2>
-struct set_value_free<free_set_value_non_const_receiver_2, void(V1, V2)>
-{
-  ASIO_STATIC_CONSTEXPR(bool, is_valid = true);
-  ASIO_STATIC_CONSTEXPR(bool, is_noexcept = false);
-  typedef void result_type;
-};
-
-} // namespace traits
-} // namespace asio
-
-#endif // !defined(ASIO_HAS_DEDUCED_SET_VALUE_FREE_TRAIT)
 
 void test_can_set_value()
 {
@@ -400,78 +120,6 @@ void test_can_set_value()
   ASIO_CONSTEXPR bool b6 = exec::can_set_value<
       const no_set_value&, int, std::string>::value;
   ASIO_CHECK(b6 == false);
-
-  ASIO_CONSTEXPR bool b7 = exec::can_set_value<
-      const_member_set_value_0&>::value;
-  ASIO_CHECK(b7 == true);
-
-  ASIO_CONSTEXPR bool b8 = exec::can_set_value<
-      const const_member_set_value_0&>::value;
-  ASIO_CHECK(b8 == true);
-
-  ASIO_CONSTEXPR bool b9 = exec::can_set_value<
-      const_member_set_value_0&, int>::value;
-  ASIO_CHECK(b9 == false);
-
-  ASIO_CONSTEXPR bool b10 = exec::can_set_value<
-      const const_member_set_value_0&, int>::value;
-  ASIO_CHECK(b10 == false);
-
-  ASIO_CONSTEXPR bool b11 = exec::can_set_value<
-      const_member_set_value_0&, int, std::string>::value;
-  ASIO_CHECK(b11 == false);
-
-  ASIO_CONSTEXPR bool b12 = exec::can_set_value<
-      const const_member_set_value_0&, int, std::string>::value;
-  ASIO_CHECK(b12 == false);
-
-  ASIO_CONSTEXPR bool b13 = exec::can_set_value<
-      const_member_set_value_1&>::value;
-  ASIO_CHECK(b13 == false);
-
-  ASIO_CONSTEXPR bool b14 = exec::can_set_value<
-      const const_member_set_value_1&>::value;
-  ASIO_CHECK(b14 == false);
-
-  ASIO_CONSTEXPR bool b15 = exec::can_set_value<
-      const_member_set_value_1&, int>::value;
-  ASIO_CHECK(b15 == true);
-
-  ASIO_CONSTEXPR bool b16 = exec::can_set_value<
-      const const_member_set_value_1&, int>::value;
-  ASIO_CHECK(b16 == true);
-
-  ASIO_CONSTEXPR bool b17 = exec::can_set_value<
-      const_member_set_value_1&, int, std::string>::value;
-  ASIO_CHECK(b17 == false);
-
-  ASIO_CONSTEXPR bool b18 = exec::can_set_value<
-      const const_member_set_value_1&, int, std::string>::value;
-  ASIO_CHECK(b18 == false);
-
-  ASIO_CONSTEXPR bool b19 = exec::can_set_value<
-      const_member_set_value_2&>::value;
-  ASIO_CHECK(b19 == false);
-
-  ASIO_CONSTEXPR bool b20 = exec::can_set_value<
-      const const_member_set_value_2&>::value;
-  ASIO_CHECK(b20 == false);
-
-  ASIO_CONSTEXPR bool b21 = exec::can_set_value<
-      const_member_set_value_2&, int>::value;
-  ASIO_CHECK(b21 == false);
-
-  ASIO_CONSTEXPR bool b22 = exec::can_set_value<
-      const const_member_set_value_2&, int>::value;
-  ASIO_CHECK(b22 == false);
-
-  ASIO_CONSTEXPR bool b23 = exec::can_set_value<
-      const_member_set_value_2&, int, std::string>::value;
-  ASIO_CHECK(b23 == true);
-
-  ASIO_CONSTEXPR bool b24 = exec::can_set_value<
-      const const_member_set_value_2&, int, std::string>::value;
-  ASIO_CHECK(b24 == true);
 
   ASIO_CONSTEXPR bool b25 = exec::can_set_value<
       free_set_value_const_receiver_0&>::value;
@@ -544,78 +192,6 @@ void test_can_set_value()
   ASIO_CONSTEXPR bool b42 = exec::can_set_value<
       const free_set_value_const_receiver_2&, int, std::string>::value;
   ASIO_CHECK(b42 == true);
-
-  ASIO_CONSTEXPR bool b43 = exec::can_set_value<
-      non_const_member_set_value_0&>::value;
-  ASIO_CHECK(b43 == true);
-
-  ASIO_CONSTEXPR bool b44 = exec::can_set_value<
-      const non_const_member_set_value_0&>::value;
-  ASIO_CHECK(b44 == false);
-
-  ASIO_CONSTEXPR bool b45 = exec::can_set_value<
-      non_const_member_set_value_0&, int>::value;
-  ASIO_CHECK(b45 == false);
-
-  ASIO_CONSTEXPR bool b46 = exec::can_set_value<
-      const non_const_member_set_value_0&, int>::value;
-  ASIO_CHECK(b46 == false);
-
-  ASIO_CONSTEXPR bool b47 = exec::can_set_value<
-      non_const_member_set_value_0&, int, std::string>::value;
-  ASIO_CHECK(b47 == false);
-
-  ASIO_CONSTEXPR bool b48 = exec::can_set_value<
-      const non_const_member_set_value_0&, int, std::string>::value;
-  ASIO_CHECK(b48 == false);
-
-  ASIO_CONSTEXPR bool b49 = exec::can_set_value<
-      non_const_member_set_value_1&>::value;
-  ASIO_CHECK(b49 == false);
-
-  ASIO_CONSTEXPR bool b50 = exec::can_set_value<
-      const non_const_member_set_value_1&>::value;
-  ASIO_CHECK(b50 == false);
-
-  ASIO_CONSTEXPR bool b51 = exec::can_set_value<
-      non_const_member_set_value_1&, int>::value;
-  ASIO_CHECK(b51 == true);
-
-  ASIO_CONSTEXPR bool b52 = exec::can_set_value<
-      const non_const_member_set_value_1&, int>::value;
-  ASIO_CHECK(b52 == false);
-
-  ASIO_CONSTEXPR bool b53 = exec::can_set_value<
-      non_const_member_set_value_1&, int, std::string>::value;
-  ASIO_CHECK(b53 == false);
-
-  ASIO_CONSTEXPR bool b54 = exec::can_set_value<
-      const non_const_member_set_value_1&, int, std::string>::value;
-  ASIO_CHECK(b54 == false);
-
-  ASIO_CONSTEXPR bool b55 = exec::can_set_value<
-      non_const_member_set_value_2&>::value;
-  ASIO_CHECK(b55 == false);
-
-  ASIO_CONSTEXPR bool b56 = exec::can_set_value<
-      const non_const_member_set_value_2&>::value;
-  ASIO_CHECK(b56 == false);
-
-  ASIO_CONSTEXPR bool b57 = exec::can_set_value<
-      non_const_member_set_value_2&, int>::value;
-  ASIO_CHECK(b57 == false);
-
-  ASIO_CONSTEXPR bool b58 = exec::can_set_value<
-      const non_const_member_set_value_2&, int>::value;
-  ASIO_CHECK(b58 == false);
-
-  ASIO_CONSTEXPR bool b59 = exec::can_set_value<
-      non_const_member_set_value_2&, int, std::string>::value;
-  ASIO_CHECK(b59 == true);
-
-  ASIO_CONSTEXPR bool b60 = exec::can_set_value<
-      const non_const_member_set_value_2&, int, std::string>::value;
-  ASIO_CHECK(b60 == false);
 
   ASIO_CONSTEXPR bool b61 = exec::can_set_value<
       free_set_value_non_const_receiver_0&>::value;
@@ -698,48 +274,6 @@ void increment(int* count)
 void test_set_value()
 {
   call_count = 0;
-  const_member_set_value_0 ex1 = {};
-  exec::set_value(ex1);
-  ASIO_CHECK(call_count == 1);
-
-  call_count = 0;
-  const const_member_set_value_0 ex2 = {};
-  exec::set_value(ex2);
-  ASIO_CHECK(call_count == 1);
-
-  call_count = 0;
-  exec::set_value(const_member_set_value_0());
-  ASIO_CHECK(call_count == 1);
-
-  call_count = 0;
-  const_member_set_value_1 ex3 = {};
-  exec::set_value(ex3, 123);
-  ASIO_CHECK(call_count == 1);
-
-  call_count = 0;
-  const const_member_set_value_1 ex4 = {};
-  exec::set_value(ex4, 123);
-  ASIO_CHECK(call_count == 1);
-
-  call_count = 0;
-  exec::set_value(const_member_set_value_1(), 123);
-  ASIO_CHECK(call_count == 1);
-
-  call_count = 0;
-  const_member_set_value_2 ex5 = {};
-  exec::set_value(ex5, 123, std::string());
-  ASIO_CHECK(call_count == 1);
-
-  call_count = 0;
-  const const_member_set_value_2 ex6 = {};
-  exec::set_value(ex6, 123, std::string());
-  ASIO_CHECK(call_count == 1);
-
-  call_count = 0;
-  exec::set_value(const_member_set_value_2(), 123, std::string());
-  ASIO_CHECK(call_count == 1);
-
-  call_count = 0;
   free_set_value_const_receiver_0 ex7 = {};
   exec::set_value(ex7);
   ASIO_CHECK(call_count == 1);
@@ -779,21 +313,6 @@ void test_set_value()
 
   call_count = 0;
   exec::set_value(free_set_value_const_receiver_2(), 123, std::string());
-  ASIO_CHECK(call_count == 1);
-
-  call_count = 0;
-  non_const_member_set_value_0 ex13 = {};
-  exec::set_value(ex13);
-  ASIO_CHECK(call_count == 1);
-
-  call_count = 0;
-  non_const_member_set_value_1 ex14 = {};
-  exec::set_value(ex14, 123);
-  ASIO_CHECK(call_count == 1);
-
-  call_count = 0;
-  non_const_member_set_value_2 ex15 = {};
-  exec::set_value(ex15, 123, std::string());
   ASIO_CHECK(call_count == 1);
 
   call_count = 0;

@@ -77,7 +77,7 @@ struct receiver_of_0
   {
   }
 
-  void set_value()
+  friend void tag_invoke(decltype(asio::execution::set_value), ASIO_MOVE_ARG(receiver_of_0))
   {
   }
 };
@@ -108,7 +108,7 @@ struct receiver_of_1
   {
   }
 
-  void set_value(int) ASIO_NOEXCEPT
+  friend void tag_invoke(decltype(asio::execution::set_value), ASIO_MOVE_ARG(receiver_of_1), int) ASIO_NOEXCEPT
   {
   }
 };
@@ -139,7 +139,7 @@ struct receiver_of_2
   {
   }
 
-  void set_value(int, std::string)
+  friend void tag_invoke(decltype(asio::execution::set_value), ASIO_MOVE_ARG(receiver_of_2), int, std::string)
   {
   }
 };

@@ -312,9 +312,9 @@ struct receiver
   }
 #endif // defined(ASIO_HAS_MOVE)
 
-  void set_value() ASIO_NOEXCEPT
+  friend void tag_invoke(decltype(asio::execution::set_value), ASIO_MOVE_ARG(receiver) self) ASIO_NOEXCEPT
   {
-    ++(*count_);
+    ++(*self.count_);
   }
 
   template <typename E>
@@ -327,24 +327,6 @@ struct receiver
   {
   }
 };
-
-namespace asio {
-namespace traits {
-
-#if !defined(ASIO_HAS_DEDUCED_SET_VALUE_MEMBER_TRAIT)
-
-template <>
-struct set_value_member<receiver, void()>
-{
-  ASIO_STATIC_CONSTEXPR(bool, is_valid = true);
-  ASIO_STATIC_CONSTEXPR(bool, is_noexcept = true);
-  typedef void result_type;
-};
-
-#endif // !defined(ASIO_HAS_DEDUCED_SET_VALUE_MEMBER_TRAIT)
-
-} // namespace traits
-} // namespace asio
 
 void thread_pool_scheduler_test()
 {

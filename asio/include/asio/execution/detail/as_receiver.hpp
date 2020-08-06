@@ -19,7 +19,7 @@
 #include "asio/detail/type_traits.hpp"
 #include "asio/execution/set_done.hpp"
 #include "asio/execution/set_error.hpp"
-#include "asio/traits/set_value_member.hpp"
+#include "asio/execution/set_value.hpp"
 
 #include "asio/detail/push_options.hpp"
 
@@ -45,10 +45,10 @@ struct as_receiver
   }
 #endif // defined(ASIO_MSVC) && defined(ASIO_HAS_MOVE)
 
-  void set_value()
+  friend void tag_invoke(decltype(asio::execution::set_value), ASIO_MOVE_ARG(as_receiver) self)
     ASIO_NOEXCEPT_IF(noexcept(declval<Function&>()()))
   {
-    f_();
+    self.f_();
   }
 
   template <typename E>
@@ -74,27 +74,6 @@ struct is_as_receiver<as_receiver<Function, T> > : true_type
 
 } // namespace detail
 } // namespace execution
-namespace traits {
-
-#if !defined(ASIO_HAS_DEDUCED_SET_VALUE_MEMBER_TRAIT)
-
-template <typename Function, typename T>
-struct set_value_member<
-    asio::execution::detail::as_receiver<Function, T>, void()>
-{
-  ASIO_STATIC_CONSTEXPR(bool, is_valid = true);
-#if defined(ASIO_HAS_NOEXCEPT)
-  ASIO_STATIC_CONSTEXPR(bool,
-      is_noexcept = noexcept(declval<Function&>()()));
-#else // defined(ASIO_HAS_NOEXCEPT)
-  ASIO_STATIC_CONSTEXPR(bool, is_noexcept = true);
-#endif // defined(ASIO_HAS_NOEXCEPT)
-  typedef void result_type;
-};
-
-#endif // !defined(ASIO_HAS_DEDUCED_SET_VALUE_MEMBER_TRAIT)
-
-} // namespace traits
 } // namespace asio
 
 #include "asio/detail/pop_options.hpp"
