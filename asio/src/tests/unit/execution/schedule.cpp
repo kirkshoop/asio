@@ -123,7 +123,7 @@ struct execute_member<executor, F>
   typedef void result_type;
 };
 
-#endif // !defined(ASIO_HAS_DEDUCED_SET_ERROR_MEMBER_TRAIT)
+#endif // !defined(ASIO_HAS_DEDUCED_EXECUTE_MEMBER_TRAIT)
 #if !defined(ASIO_HAS_DEDUCED_EQUALITY_COMPARABLE_TRAIT)
 
 template <>
@@ -201,7 +201,7 @@ struct receiver
   }
 
   template <typename E>
-  void set_error(ASIO_MOVE_ARG(E) e) ASIO_NOEXCEPT
+  friend void tag_invoke(decltype(asio::execution::set_error), ASIO_MOVE_ARG(receiver), ASIO_MOVE_ARG(E) e) ASIO_NOEXCEPT
   {
     (void)e;
   }
@@ -225,18 +225,6 @@ struct set_value_member<receiver, void()>
 };
 
 #endif // !defined(ASIO_HAS_DEDUCED_SET_VALUE_MEMBER_TRAIT)
-
-#if !defined(ASIO_HAS_DEDUCED_SET_ERROR_MEMBER_TRAIT)
-
-template <typename E>
-struct set_error_member<receiver, E>
-{
-  ASIO_STATIC_CONSTEXPR(bool, is_valid = true);
-  ASIO_STATIC_CONSTEXPR(bool, is_noexcept = true);
-  typedef void result_type;
-};
-
-#endif // !defined(ASIO_HAS_DEDUCED_SET_ERROR_MEMBER_TRAIT)
 
 } // namespace traits
 } // namespace asio

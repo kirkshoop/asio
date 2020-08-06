@@ -17,8 +17,7 @@
 
 #include "asio/detail/config.hpp"
 #include "asio/detail/type_traits.hpp"
-#include "asio/traits/set_error_member.hpp"
-#include "asio/traits/set_error_free.hpp"
+#include "asio/tag_invokes/tag_invoke.hpp"
 
 #include "asio/detail/push_options.hpp"
 
@@ -33,16 +32,10 @@ namespace execution {
  * The expression <tt>execution::set_error(R, E)</tt> for some subexpressions
  * <tt>R</tt> and <tt>E</tt> are expression-equivalent to:
  *
- * @li <tt>R.set_error(E)</tt>, if that expression is valid. If the function
- *   selected does not send the error <tt>E</tt> to the receiver <tt>R</tt>'s
- *   error channel, the program is ill-formed with no diagnostic required.
- *
- * @li Otherwise, <tt>set_error(R, E)</tt>, if that expression is valid, with
- *   overload resolution performed in a context that includes the declaration
- *   <tt>void set_error();</tt> and that does not include a declaration of
- *   <tt>execution::set_error</tt>. If the function selected by overload
- *   resolution does not send the error <tt>E</tt> to the receiver <tt>R</tt>'s
- *   error channel, the program is ill-formed with no diagnostic required.
+ * @li <tt>set_error(R, E)</tt>, if that expression is valid, and if the expression 
+ *   <tt>asio::tag_invokes::tag_invoke(set_done, R, E)</tt> is valid. If the function 
+ *   selected by overload resolution does not send the error <tt>E</tt> to the receiver 
+ *   <tt>R</tt>'s error channel, the program is ill-formed with no diagnostic required.
  *
  * @li Otherwise, <tt>execution::set_error(R, E)</tt> is ill-formed.
  */
@@ -71,125 +64,47 @@ namespace asio_execution_set_error_fn {
 using asio::decay;
 using asio::declval;
 using asio::enable_if;
-using asio::traits::set_error_free;
-using asio::traits::set_error_member;
-
-void set_error();
-
-enum overload_type
-{
-  call_member,
-  call_free,
-  ill_formed
-};
-
-template <typename R, typename E, typename = void>
-struct call_traits
-{
-  ASIO_STATIC_CONSTEXPR(overload_type, overload = ill_formed);
-  ASIO_STATIC_CONSTEXPR(bool, is_noexcept = false);
-  typedef void result_type;
-};
-
-template <typename R, typename E>
-struct call_traits<R, void(E),
-  typename enable_if<
-    (
-      set_error_member<R, E>::is_valid
-    )
-  >::type> :
-  set_error_member<R, E>
-{
-  ASIO_STATIC_CONSTEXPR(overload_type, overload = call_member);
-};
-
-template <typename R, typename E>
-struct call_traits<R, void(E),
-  typename enable_if<
-    (
-      !set_error_member<R, E>::is_valid
-      &&
-      set_error_free<R, E>::is_valid
-    )
-  >::type> :
-  set_error_free<R, E>
-{
-  ASIO_STATIC_CONSTEXPR(overload_type, overload = call_free);
-};
+using asio::tag_invokes::can_tag_invoke;
+using asio::tag_invokes::tag_invoke_result;
+using asio::tag_invokes::is_nothrow_tag_invoke;
 
 struct impl
 {
 #if defined(ASIO_HAS_MOVE)
   template <typename R, typename E>
   ASIO_CONSTEXPR typename enable_if<
-    call_traits<R, void(E)>::overload == call_member,
-    typename call_traits<R, void(E)>::result_type
+    can_tag_invoke<impl, R, E>::value,
+    typename tag_invoke_result<impl, R, E>::type
   >::type
   operator()(R&& r, E&& e) const
     ASIO_NOEXCEPT_IF((
-      call_traits<R, void(E)>::is_noexcept))
+      is_nothrow_tag_invoke<impl, R, E>::value))
   {
-    return ASIO_MOVE_CAST(R)(r).set_error(ASIO_MOVE_CAST(E)(e));
-  }
-
-  template <typename R, typename E>
-  ASIO_CONSTEXPR typename enable_if<
-    call_traits<R, void(E)>::overload == call_free,
-    typename call_traits<R, void(E)>::result_type
-  >::type
-  operator()(R&& r, E&& e) const
-    ASIO_NOEXCEPT_IF((
-      call_traits<R, void(E)>::is_noexcept))
-  {
-    return set_error(ASIO_MOVE_CAST(R)(r), ASIO_MOVE_CAST(E)(e));
+    return asio::tag_invokes::tag_invoke(*this, ASIO_MOVE_CAST(R)(r), ASIO_MOVE_CAST(E)(e));
   }
 #else // defined(ASIO_HAS_MOVE)
   template <typename R, typename E>
   ASIO_CONSTEXPR typename enable_if<
-    call_traits<R&, void(const E&)>::overload == call_member,
-    typename call_traits<R&, void(const E&)>::result_type
+    can_tag_invoke<impl, R&, const E&>::value,
+    typename tag_invoke_result<impl, R&, const E&>::type
   >::type
   operator()(R& r, const E& e) const
     ASIO_NOEXCEPT_IF((
-      call_traits<R&, void(const E&)>::is_noexcept))
+      is_nothrow_tag_invoke<impl, R&, const E&>::value))
   {
-    return r.set_error(e);
+    return asio::tag_invokes::tag_invoke(*this, r, e);
   }
 
   template <typename R, typename E>
   ASIO_CONSTEXPR typename enable_if<
-    call_traits<const R&, void(const E&)>::overload == call_member,
-    typename call_traits<const R&, void(const E&)>::result_type
+    can_tag_invoke<impl, const R&, const E&>::value,
+    typename tag_invoke_result<impl, const R&, const E&>::type
   >::type
   operator()(const R& r, const E& e) const
     ASIO_NOEXCEPT_IF((
-      call_traits<const R&, void(const E&)>::is_noexcept))
+      is_nothrow_tag_invoke<impl, const R&, const E&>::value))
   {
-    return r.set_error(e);
-  }
-
-  template <typename R, typename E>
-  ASIO_CONSTEXPR typename enable_if<
-    call_traits<R&, void(const E&)>::overload == call_free,
-    typename call_traits<R&, void(const E&)>::result_type
-  >::type
-  operator()(R& r, const E& e) const
-    ASIO_NOEXCEPT_IF((
-      call_traits<R&, void(const E&)>::is_noexcept))
-  {
-    return set_error(r, e);
-  }
-
-  template <typename R, typename E>
-  ASIO_CONSTEXPR typename enable_if<
-    call_traits<const R&, void(const E&)>::overload == call_free,
-    typename call_traits<const R&, void(const E&)>::result_type
-  >::type
-  operator()(const R& r, const E& e) const
-    ASIO_NOEXCEPT_IF((
-      call_traits<const R&, void(const E&)>::is_noexcept))
-  {
-    return set_error(r, e);
+    return asio::tag_invokes::tag_invoke(*this, r, e);
   }
 #endif // defined(ASIO_HAS_MOVE)
 };
@@ -216,8 +131,7 @@ static ASIO_CONSTEXPR const asio_execution_set_error_fn::impl&
 template <typename R, typename E>
 struct can_set_error :
   integral_constant<bool,
-    asio_execution_set_error_fn::call_traits<R, void(E)>::overload !=
-      asio_execution_set_error_fn::ill_formed>
+    asio::tag_invokes::can_tag_invoke<asio_execution_set_error_fn::impl, R, E>::value>
 {
 };
 
@@ -231,7 +145,7 @@ constexpr bool can_set_error_v = can_set_error<R, E>::value;
 template <typename R, typename E>
 struct is_nothrow_set_error :
   integral_constant<bool,
-    asio_execution_set_error_fn::call_traits<R, void(E)>::is_noexcept>
+    asio::tag_invokes::is_nothrow_tag_invoke<asio_execution_set_error_fn::impl, R, E>::value>
 {
 };
 

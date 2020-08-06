@@ -17,7 +17,7 @@
 
 #include "asio/detail/config.hpp"
 #include "asio/execution/set_done.hpp"
-#include "asio/traits/set_error_member.hpp"
+#include "asio/execution/set_error.hpp"
 #include "asio/traits/set_value_member.hpp"
 
 #include "asio/detail/push_options.hpp"
@@ -33,7 +33,7 @@ struct void_receiver
   }
 
   template <typename E>
-  void set_error(ASIO_MOVE_ARG(E)) ASIO_NOEXCEPT
+  friend void tag_invoke(decltype(asio::execution::set_error), ASIO_MOVE_ARG(void_receiver), ASIO_MOVE_ARG(E)) ASIO_NOEXCEPT
   {
   }
 
@@ -57,18 +57,6 @@ struct set_value_member<asio::execution::detail::void_receiver, void()>
 };
 
 #endif // !defined(ASIO_HAS_DEDUCED_SET_VALUE_MEMBER_TRAIT)
-
-#if !defined(ASIO_HAS_DEDUCED_SET_ERROR_MEMBER_TRAIT)
-
-template <typename E>
-struct set_error_member<asio::execution::detail::void_receiver, E>
-{
-  ASIO_STATIC_CONSTEXPR(bool, is_valid = true);
-  ASIO_STATIC_CONSTEXPR(bool, is_noexcept = true);
-  typedef void result_type;
-};
-
-#endif // !defined(ASIO_HAS_DEDUCED_SET_ERROR_MEMBER_TRAIT)
 
 } // namespace traits
 } // namespace asio
