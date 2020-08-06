@@ -49,38 +49,6 @@ struct no_bulk_execute
 {
 };
 
-struct const_member_bulk_execute
-{
-  const_member_bulk_execute()
-  {
-  }
-
-  template <typename F>
-  sender bulk_execute(ASIO_MOVE_ARG(F), std::size_t) const
-  {
-    ++call_count;
-    return sender();
-  }
-};
-
-namespace asio {
-namespace traits {
-
-#if !defined(ASIO_HAS_DEDUCED_BULK_EXECUTE_MEMBER_TRAIT)
-
-template <typename F, typename N>
-struct bulk_execute_member<const const_member_bulk_execute, F, N>
-{
-  ASIO_STATIC_CONSTEXPR(bool, is_valid = true);
-  ASIO_STATIC_CONSTEXPR(bool, is_noexcept = false);
-  typedef sender result_type;
-};
-
-#endif // !defined(ASIO_HAS_DEDUCED_BULK_EXECUTE_MEMBER_TRAIT)
-
-} // namespace traits
-} // namespace asio
-
 struct free_bulk_execute
 {
   free_bulk_execute()
@@ -88,31 +56,13 @@ struct free_bulk_execute
   }
 
   template <typename F>
-  friend sender bulk_execute(const free_bulk_execute&,
+  friend sender tag_invoke(decltype(exec::bulk_execute), const free_bulk_execute&,
       ASIO_MOVE_ARG(F), std::size_t)
   {
     ++call_count;
     return sender();
   }
 };
-
-namespace asio {
-namespace traits {
-
-#if !defined(ASIO_HAS_DEDUCED_BULK_EXECUTE_FREE_TRAIT)
-
-template <typename F, typename N>
-struct bulk_execute_free<const free_bulk_execute, F, N>
-{
-  ASIO_STATIC_CONSTEXPR(bool, is_valid = true);
-  ASIO_STATIC_CONSTEXPR(bool, is_noexcept = false);
-  typedef sender result_type;
-};
-
-#endif // !defined(ASIO_HAS_DEDUCED_BULK_EXECUTE_FREE_TRAIT)
-
-} // namespace traits
-} // namespace asio
 
 struct executor
 {
@@ -186,15 +136,6 @@ void test_can_bulk_execute()
       const no_bulk_execute&, exec::invocable_archetype, std::size_t>::value;
   ASIO_CHECK(b2 == false);
 
-  ASIO_CONSTEXPR bool b3 = exec::can_bulk_execute<
-      const_member_bulk_execute&, exec::invocable_archetype, std::size_t>::value;
-  ASIO_CHECK(b3 == true);
-
-  ASIO_CONSTEXPR bool b4 = exec::can_bulk_execute<
-      const const_member_bulk_execute&,
-      exec::invocable_archetype, std::size_t>::value;
-  ASIO_CHECK(b4 == true);
-
   ASIO_CONSTEXPR bool b5 = exec::can_bulk_execute<
       free_bulk_execute&, exec::invocable_archetype, std::size_t>::value;
   ASIO_CHECK(b5 == true);
@@ -228,20 +169,6 @@ void completion_handler()
 
 void test_bulk_execute()
 {
-  call_count = 0;
-  const_member_bulk_execute ex1;
-  exec::bulk_execute(ex1, handler, 2);
-  ASIO_CHECK(call_count == 1);
-
-  call_count = 0;
-  const const_member_bulk_execute ex2;
-  exec::bulk_execute(ex2, handler, 2);
-  ASIO_CHECK(call_count == 1);
-
-  call_count = 0;
-  exec::bulk_execute(const_member_bulk_execute(), handler, 2);
-  ASIO_CHECK(call_count == 1);
-
   call_count = 0;
   free_bulk_execute ex3;
   exec::bulk_execute(ex3, handler, 2);

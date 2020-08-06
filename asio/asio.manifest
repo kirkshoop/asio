@@ -4912,8 +4912,6 @@
 /include/asio/thread_pool.hpp
 /include/asio/time_traits.hpp
 /include/asio/traits/
-/include/asio/traits/bulk_execute_free.hpp
-/include/asio/traits/bulk_execute_member.hpp
 /include/asio/traits/equality_comparable.hpp
 /include/asio/traits/execute_free.hpp
 /include/asio/traits/execute_member.hpp
