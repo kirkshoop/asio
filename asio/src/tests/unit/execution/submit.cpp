@@ -153,7 +153,7 @@ struct receiver
     (void)e;
   }
 
-  void set_done() ASIO_NOEXCEPT
+  friend void tag_invoke(decltype(exec::set_done), ASIO_MOVE_ARG(receiver)) ASIO_NOEXCEPT
   {
   }
 };
@@ -172,17 +172,6 @@ struct set_error_member<receiver, E>
 };
 
 #endif // !defined(ASIO_HAS_DEDUCED_SET_ERROR_MEMBER_TRAIT)
-#if !defined(ASIO_HAS_DEDUCED_SET_DONE_MEMBER_TRAIT)
-
-template <>
-struct set_done_member<receiver>
-{
-  ASIO_STATIC_CONSTEXPR(bool, is_valid = true);
-  ASIO_STATIC_CONSTEXPR(bool, is_noexcept = true);
-  typedef void result_type;
-};
-
-#endif // !defined(ASIO_HAS_DEDUCED_SET_DONE_MEMBER_TRAIT)
 
 } // namespace traits
 } // namespace asio

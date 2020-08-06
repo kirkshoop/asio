@@ -46,7 +46,7 @@ struct receiver
     (void)e;
   }
 
-  void set_done() ASIO_NOEXCEPT
+  friend void tag_invoke(decltype(asio::execution::set_done), ASIO_MOVE_ARG(receiver)) ASIO_NOEXCEPT
   {
   }
 };
@@ -65,17 +65,6 @@ struct set_error_member<receiver, E>
 };
 
 #endif // !defined(ASIO_HAS_DEDUCED_SET_ERROR_MEMBER_TRAIT)
-#if !defined(ASIO_HAS_DEDUCED_SET_DONE_MEMBER_TRAIT)
-
-template <>
-struct set_done_member<receiver>
-{
-  ASIO_STATIC_CONSTEXPR(bool, is_valid = true);
-  ASIO_STATIC_CONSTEXPR(bool, is_noexcept = true);
-  typedef void result_type;
-};
-
-#endif // !defined(ASIO_HAS_DEDUCED_SET_DONE_MEMBER_TRAIT)
 
 } // namespace traits
 } // namespace asio
@@ -102,7 +91,7 @@ struct receiver_of_0
     (void)e;
   }
 
-  void set_done() ASIO_NOEXCEPT
+  friend void tag_invoke(decltype(asio::execution::set_done), ASIO_MOVE_ARG(receiver_of_0)) ASIO_NOEXCEPT
   {
   }
 
@@ -125,28 +114,6 @@ struct set_error_member<receiver_of_0, E>
 };
 
 #endif // !defined(ASIO_HAS_DEDUCED_SET_ERROR_MEMBER_TRAIT)
-#if !defined(ASIO_HAS_DEDUCED_SET_DONE_MEMBER_TRAIT)
-
-template <>
-struct set_done_member<receiver_of_0>
-{
-  ASIO_STATIC_CONSTEXPR(bool, is_valid = true);
-  ASIO_STATIC_CONSTEXPR(bool, is_noexcept = true);
-  typedef void result_type;
-};
-
-#endif // !defined(ASIO_HAS_DEDUCED_SET_DONE_MEMBER_TRAIT)
-#if !defined(ASIO_HAS_DEDUCED_SET_DONE_MEMBER_TRAIT)
-
-template <>
-struct set_value_member<receiver_of_0, void()>
-{
-  ASIO_STATIC_CONSTEXPR(bool, is_valid = true);
-  ASIO_STATIC_CONSTEXPR(bool, is_noexcept = false);
-  typedef void result_type;
-};
-
-#endif // !defined(ASIO_HAS_DEDUCED_SET_DONE_MEMBER_TRAIT)
 
 } // namespace traits
 } // namespace asio
@@ -173,7 +140,7 @@ struct receiver_of_1
     (void)e;
   }
 
-  void set_done() ASIO_NOEXCEPT
+  friend void tag_invoke(decltype(asio::execution::set_done), ASIO_MOVE_ARG(receiver_of_1)) ASIO_NOEXCEPT
   {
   }
 
@@ -196,28 +163,6 @@ struct set_error_member<receiver_of_1, E>
 };
 
 #endif // !defined(ASIO_HAS_DEDUCED_SET_ERROR_MEMBER_TRAIT)
-#if !defined(ASIO_HAS_DEDUCED_SET_DONE_MEMBER_TRAIT)
-
-template <>
-struct set_done_member<receiver_of_1>
-{
-  ASIO_STATIC_CONSTEXPR(bool, is_valid = true);
-  ASIO_STATIC_CONSTEXPR(bool, is_noexcept = true);
-  typedef void result_type;
-};
-
-#endif // !defined(ASIO_HAS_DEDUCED_SET_DONE_MEMBER_TRAIT)
-#if !defined(ASIO_HAS_DEDUCED_SET_DONE_MEMBER_TRAIT)
-
-template <>
-struct set_value_member<receiver_of_1, void(int)>
-{
-  ASIO_STATIC_CONSTEXPR(bool, is_valid = true);
-  ASIO_STATIC_CONSTEXPR(bool, is_noexcept = true);
-  typedef void result_type;
-};
-
-#endif // !defined(ASIO_HAS_DEDUCED_SET_DONE_MEMBER_TRAIT)
 
 } // namespace traits
 } // namespace asio
@@ -244,7 +189,7 @@ struct receiver_of_2
     (void)e;
   }
 
-  void set_done() ASIO_NOEXCEPT
+  friend void tag_invoke(decltype(asio::execution::set_done), ASIO_MOVE_ARG(receiver_of_2)) ASIO_NOEXCEPT
   {
   }
 
@@ -267,28 +212,6 @@ struct set_error_member<receiver_of_2, E>
 };
 
 #endif // !defined(ASIO_HAS_DEDUCED_SET_ERROR_MEMBER_TRAIT)
-#if !defined(ASIO_HAS_DEDUCED_SET_DONE_MEMBER_TRAIT)
-
-template <>
-struct set_done_member<receiver_of_2>
-{
-  ASIO_STATIC_CONSTEXPR(bool, is_valid = true);
-  ASIO_STATIC_CONSTEXPR(bool, is_noexcept = true);
-  typedef void result_type;
-};
-
-#endif // !defined(ASIO_HAS_DEDUCED_SET_DONE_MEMBER_TRAIT)
-#if !defined(ASIO_HAS_DEDUCED_SET_DONE_MEMBER_TRAIT)
-
-template <>
-struct set_value_member<receiver_of_2, void(int, std::string)>
-{
-  ASIO_STATIC_CONSTEXPR(bool, is_valid = true);
-  ASIO_STATIC_CONSTEXPR(bool, is_noexcept = false);
-  typedef void result_type;
-};
-
-#endif // !defined(ASIO_HAS_DEDUCED_SET_DONE_MEMBER_TRAIT)
 
 } // namespace traits
 } // namespace asio

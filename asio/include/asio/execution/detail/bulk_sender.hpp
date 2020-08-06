@@ -21,7 +21,6 @@
 #include "asio/execution/executor.hpp"
 #include "asio/execution/set_done.hpp"
 #include "asio/execution/set_error.hpp"
-#include "asio/traits/set_done_member.hpp"
 #include "asio/traits/set_error_member.hpp"
 #include "asio/traits/set_value_member.hpp"
 
@@ -66,11 +65,11 @@ struct bulk_receiver
         ASIO_MOVE_CAST(Error)(e));
   }
 
-  void set_done() ASIO_NOEXCEPT
+  friend void tag_invoke(decltype(execution::set_done), ASIO_MOVE_ARG(bulk_receiver) self) ASIO_NOEXCEPT
   {
     execution::set_done(
         ASIO_MOVE_OR_LVALUE(
-          typename remove_cvref<Receiver>::type)(receiver_));
+          typename remove_cvref<Receiver>::type)(self.receiver_));
   }
 };
 
@@ -188,19 +187,6 @@ struct set_error_member<
 };
 
 #endif // !defined(ASIO_HAS_DEDUCED_SET_ERROR_MEMBER_TRAIT)
-
-#if !defined(ASIO_HAS_DEDUCED_SET_DONE_MEMBER_TRAIT)
-
-template <typename Receiver, typename Function, typename Number, typename Index>
-struct set_done_member<
-    execution::detail::bulk_receiver<Receiver, Function, Number, Index> >
-{
-  ASIO_STATIC_CONSTEXPR(bool, is_valid = true);
-  ASIO_STATIC_CONSTEXPR(bool, is_noexcept = true);
-  typedef void result_type;
-};
-
-#endif // !defined(ASIO_HAS_DEDUCED_SET_DONE_MEMBER_TRAIT)
 
 } // namespace traits
 } // namespace asio

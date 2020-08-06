@@ -16,7 +16,7 @@
 #endif // defined(_MSC_VER) && (_MSC_VER >= 1200)
 
 #include "asio/detail/config.hpp"
-#include "asio/traits/set_done_member.hpp"
+#include "asio/execution/set_done.hpp"
 #include "asio/traits/set_error_member.hpp"
 #include "asio/traits/set_value_member.hpp"
 
@@ -37,7 +37,7 @@ struct void_receiver
   {
   }
 
-  void set_done() ASIO_NOEXCEPT
+  friend void tag_invoke(decltype(execution::set_done), ASIO_MOVE_ARG(void_receiver)) ASIO_NOEXCEPT
   {
   }
 };
@@ -69,18 +69,6 @@ struct set_error_member<asio::execution::detail::void_receiver, E>
 };
 
 #endif // !defined(ASIO_HAS_DEDUCED_SET_ERROR_MEMBER_TRAIT)
-
-#if !defined(ASIO_HAS_DEDUCED_SET_DONE_MEMBER_TRAIT)
-
-template <>
-struct set_done_member<asio::execution::detail::void_receiver>
-{
-  ASIO_STATIC_CONSTEXPR(bool, is_valid = true);
-  ASIO_STATIC_CONSTEXPR(bool, is_noexcept = true);
-  typedef void result_type;
-};
-
-#endif // !defined(ASIO_HAS_DEDUCED_SET_DONE_MEMBER_TRAIT)
 
 } // namespace traits
 } // namespace asio

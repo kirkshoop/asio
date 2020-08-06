@@ -27,109 +27,21 @@ struct no_set_done
 {
 };
 
-struct const_member_set_done
-{
-  void set_done() const ASIO_NOEXCEPT
-  {
-    ++call_count;
-  }
-};
-
-#if !defined(ASIO_HAS_DEDUCED_SET_DONE_MEMBER_TRAIT)
-
-namespace asio {
-namespace traits {
-
-template <>
-struct set_done_member<const const_member_set_done>
-{
-  ASIO_STATIC_CONSTEXPR(bool, is_valid = true);
-  ASIO_STATIC_CONSTEXPR(bool, is_noexcept = true);
-  typedef void result_type;
-};
-
-} // namespace traits
-} // namespace asio
-
-#endif // !defined(ASIO_HAS_DEDUCED_SET_DONE_MEMBER_TRAIT)
-
 struct free_set_done_const_receiver
 {
-  friend void set_done(const free_set_done_const_receiver&) ASIO_NOEXCEPT
+  friend void tag_invoke(decltype(exec::set_done), const free_set_done_const_receiver&) ASIO_NOEXCEPT
   {
     ++call_count;
   }
 };
-
-#if !defined(ASIO_HAS_DEDUCED_SET_DONE_FREE_TRAIT)
-
-namespace asio {
-namespace traits {
-
-template <>
-struct set_done_free<const free_set_done_const_receiver>
-{
-  ASIO_STATIC_CONSTEXPR(bool, is_valid = true);
-  ASIO_STATIC_CONSTEXPR(bool, is_noexcept = true);
-  typedef void result_type;
-};
-
-} // namespace traits
-} // namespace asio
-
-#endif // !defined(ASIO_HAS_DEDUCED_SET_DONE_FREE_TRAIT)
-
-struct non_const_member_set_done
-{
-  void set_done() ASIO_NOEXCEPT
-  {
-    ++call_count;
-  }
-};
-
-#if !defined(ASIO_HAS_DEDUCED_SET_DONE_MEMBER_TRAIT)
-
-namespace asio {
-namespace traits {
-
-template <>
-struct set_done_member<non_const_member_set_done>
-{
-  ASIO_STATIC_CONSTEXPR(bool, is_valid = true);
-  ASIO_STATIC_CONSTEXPR(bool, is_noexcept = true);
-  typedef void result_type;
-};
-
-} // namespace traits
-} // namespace asio
-
-#endif // !defined(ASIO_HAS_DEDUCED_SET_DONE_MEMBER_TRAIT)
 
 struct free_set_done_non_const_receiver
 {
-  friend void set_done(free_set_done_non_const_receiver&) ASIO_NOEXCEPT
+  friend void tag_invoke(decltype(exec::set_done), free_set_done_non_const_receiver&) ASIO_NOEXCEPT
   {
     ++call_count;
   }
 };
-
-#if !defined(ASIO_HAS_DEDUCED_SET_DONE_FREE_TRAIT)
-
-namespace asio {
-namespace traits {
-
-template <>
-struct set_done_free<free_set_done_non_const_receiver>
-{
-  ASIO_STATIC_CONSTEXPR(bool, is_valid = true);
-  ASIO_STATIC_CONSTEXPR(bool, is_noexcept = true);
-  typedef void result_type;
-};
-
-} // namespace traits
-} // namespace asio
-
-#endif // !defined(ASIO_HAS_DEDUCED_SET_DONE_FREE_TRAIT)
 
 void test_can_set_done()
 {
@@ -141,14 +53,6 @@ void test_can_set_done()
       const no_set_done&>::value;
   ASIO_CHECK(b2 == false);
 
-  ASIO_CONSTEXPR bool b3 = exec::can_set_done<
-      const_member_set_done&>::value;
-  ASIO_CHECK(b3 == true);
-
-  ASIO_CONSTEXPR bool b4 = exec::can_set_done<
-      const const_member_set_done&>::value;
-  ASIO_CHECK(b4 == true);
-
   ASIO_CONSTEXPR bool b5 = exec::can_set_done<
       free_set_done_const_receiver&>::value;
   ASIO_CHECK(b5 == true);
@@ -156,14 +60,6 @@ void test_can_set_done()
   ASIO_CONSTEXPR bool b6 = exec::can_set_done<
       const free_set_done_const_receiver&>::value;
   ASIO_CHECK(b6 == true);
-
-  ASIO_CONSTEXPR bool b7 = exec::can_set_done<
-      non_const_member_set_done&>::value;
-  ASIO_CHECK(b7 == true);
-
-  ASIO_CONSTEXPR bool b8 = exec::can_set_done<
-      const non_const_member_set_done&>::value;
-  ASIO_CHECK(b8 == false);
 
   ASIO_CONSTEXPR bool b9 = exec::can_set_done<
       free_set_done_non_const_receiver&>::value;
@@ -182,20 +78,6 @@ void increment(int* count)
 void test_set_done()
 {
   call_count = 0;
-  const_member_set_done ex1 = {};
-  exec::set_done(ex1);
-  ASIO_CHECK(call_count == 1);
-
-  call_count = 0;
-  const const_member_set_done ex2 = {};
-  exec::set_done(ex2);
-  ASIO_CHECK(call_count == 1);
-
-  call_count = 0;
-  exec::set_done(const_member_set_done());
-  ASIO_CHECK(call_count == 1);
-
-  call_count = 0;
   free_set_done_const_receiver ex3 = {};
   exec::set_done(ex3);
   ASIO_CHECK(call_count == 1);
@@ -207,11 +89,6 @@ void test_set_done()
 
   call_count = 0;
   exec::set_done(free_set_done_const_receiver());
-  ASIO_CHECK(call_count == 1);
-
-  call_count = 0;
-  non_const_member_set_done ex5 = {};
-  exec::set_done(ex5);
   ASIO_CHECK(call_count == 1);
 
   call_count = 0;
