@@ -263,7 +263,7 @@ inline bool io_context::basic_executor_type<Allocator,
 
 template <typename Allocator, unsigned int Bits>
 template <typename Function>
-void io_context::basic_executor_type<Allocator, Bits>::execute(
+void io_context::basic_executor_type<Allocator, Bits>::tag_invoke(decltype(execution::execute),
     ASIO_MOVE_ARG(Function) f) const
 {
   typedef typename decay<Function>::type function_type;

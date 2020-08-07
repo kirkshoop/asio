@@ -28,7 +28,7 @@ public:
     }
 
     template <class Func>
-    void execute(Func f) const
+    void tag_invoke(decltype(execution::execute), Func f) const
     {
       auto p(std::make_shared<item<Func>>(priority_, std::move(f)));
       std::lock_guard<std::mutex> lock(context_.mutex_);

@@ -136,7 +136,7 @@ public:
    * Throws asio::bad_executor if the polymorphic wrapper has no target.
    */
   template <typename Function>
-  void execute(Function&& f) const;
+  void tag_invoke(decltype(execution::execute), Function&& f) const;
 
   /// Obtain the underlying execution context.
   /**
@@ -593,7 +593,7 @@ public:
   }
 
   template <typename F>
-  void execute(ASIO_MOVE_ARG(F) f) const
+  void tag_invoke(decltype(execution::execute), ASIO_MOVE_ARG(F) f) const
   {
     if (target_fns_->blocking_execute != 0)
     {
@@ -1269,7 +1269,7 @@ public:
         static_cast<detail::any_executor_base&>(other));
   }
 
-  using detail::any_executor_base::execute;
+  using detail::any_executor_base::tag_invoke;
   using detail::any_executor_base::target;
   using detail::any_executor_base::target_type;
   using detail::any_executor_base::operator unspecified_bool_type;
@@ -1440,7 +1440,7 @@ public:
     }
   }
 
-  using detail::any_executor_base::execute;
+  using detail::any_executor_base::tag_invoke;
   using detail::any_executor_base::target;
   using detail::any_executor_base::target_type;
   using detail::any_executor_base::operator unspecified_bool_type;
@@ -1839,7 +1839,7 @@ inline void swap(any_executor<SupportableProperties...>& a,
       } \
     } \
     \
-    using detail::any_executor_base::execute; \
+    using detail::any_executor_base::tag_invoke; \
     using detail::any_executor_base::target; \
     using detail::any_executor_base::target_type; \
     using detail::any_executor_base::operator unspecified_bool_type; \
@@ -2089,44 +2089,6 @@ struct equality_comparable<execution::any_executor<> >
 
 #endif // defined(ASIO_HAS_VARIADIC_TEMPLATES)
 #endif // !defined(ASIO_HAS_DEDUCED_EQUALITY_COMPARABLE_TRAIT)
-
-#if !defined(ASIO_HAS_DEDUCED_EXECUTE_MEMBER_TRAIT)
-#if defined(ASIO_HAS_VARIADIC_TEMPLATES)
-
-template <typename F, typename... SupportableProperties>
-struct execute_member<execution::any_executor<SupportableProperties...>, F>
-{
-  static const bool is_valid = true;
-  static const bool is_noexcept = false;
-  typedef void result_type;
-};
-
-#else // defined(ASIO_HAS_VARIADIC_TEMPLATES)
-
-template <typename F>
-struct execute_member<execution::any_executor<>, F>
-{
-  static const bool is_valid = true;
-  static const bool is_noexcept = false;
-  typedef void result_type;
-};
-
-#define ASIO_PRIVATE_ANY_EXECUTOR_EXECUTE_MEMBER_DEF(n) \
-  template <typename F, ASIO_VARIADIC_TPARAMS(n)> \
-  struct execute_member< \
-      execution::any_executor<ASIO_VARIADIC_TARGS(n)>, F> \
-  { \
-    static const bool is_valid = true; \
-    static const bool is_noexcept = false; \
-    typedef void result_type; \
-  }; \
-  /**/
-  ASIO_VARIADIC_GENERATE(
-      ASIO_PRIVATE_ANY_EXECUTOR_EXECUTE_MEMBER_DEF)
-#undef ASIO_PRIVATE_ANY_EXECUTOR_EXECUTE_MEMBER_DEF
-
-#endif // defined(ASIO_HAS_VARIADIC_TEMPLATES)
-#endif // !defined(ASIO_HAS_DEDUCED_EXECUTE_MEMBER_TRAIT)
 
 #if !defined(ASIO_HAS_DEDUCED_QUERY_MEMBER_TRAIT)
 #if defined(ASIO_HAS_VARIADIC_TEMPLATES)

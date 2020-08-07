@@ -523,8 +523,6 @@
 /boost/asio/time_traits.hpp
 /boost/asio/traits/
 /boost/asio/traits/equality_comparable.hpp
-/boost/asio/traits/execute_free.hpp
-/boost/asio/traits/execute_member.hpp
 /boost/asio/traits/prefer_free.hpp
 /boost/asio/traits/prefer_member.hpp
 /boost/asio/traits/query_free.hpp

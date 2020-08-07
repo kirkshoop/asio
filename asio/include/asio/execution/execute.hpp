@@ -20,8 +20,6 @@
 #include "asio/execution/detail/as_invocable.hpp"
 #include "asio/execution/detail/as_receiver.hpp"
 #include "asio/tag_invokes/tag_invoke.hpp"
-#include "asio/traits/execute_member.hpp"
-#include "asio/traits/execute_free.hpp"
 
 #include "asio/detail/push_options.hpp"
 
@@ -41,14 +39,8 @@ namespace execution {
  * <tt>invocable</tt>, or if <tt>E</tt> does not model either <tt>executor</tt>
  * or <tt>sender</tt>. Otherwise, it is expression-equivalent to:
  *
- * @li <tt>e.execute(f)</tt>, if that expression is valid. If the function
- *   selected does not execute the function object <tt>f</tt> on the executor
- *   <tt>e</tt>, the program is ill-formed with no diagnostic required.
- *
- * @li Otherwise, <tt>execute(e, f)</tt>, if that expression is valid, with
- *   overload resolution performed in a context that includes the declaration
- *   <tt>void execute();</tt> and that does not include a declaration of
- *   <tt>execution::execute</tt>. If the function selected by overload
+ * @li <tt>execute(e, f)</tt>, if that expression is valid, and if the expression <tt>asio::tag_invokes::tag_invoke(bulk_execute, S, 
+ *   F, N)</tt> is valid. If the function selected by overload
  *   resolution does not execute the function object <tt>f</tt> on the executor
  *   <tt>e</tt>, the program is ill-formed with no diagnostic required.
  */
@@ -99,18 +91,13 @@ using asio::result_of;
 using asio::tag_invokes::can_tag_invoke;
 using asio::tag_invokes::tag_invoke_result;
 using asio::tag_invokes::is_nothrow_tag_invoke;
-using asio::traits::execute_free;
-using asio::traits::execute_member;
 using asio::true_type;
 
-void execute();
 struct impl;
 
 enum overload_type
 {
   call_tag_invoke,
-  call_member,
-  call_free,
   adapter,
   ill_formed
 };
@@ -140,40 +127,6 @@ struct call_traits<T, void(F),
   typename enable_if<
     (
       !can_tag_invoke<impl, T, F>::value
-      &&
-      execute_member<T, F>::is_valid
-    )
-  >::type> :
-  execute_member<T, F>
-{
-  ASIO_STATIC_CONSTEXPR(overload_type, overload = call_member);
-};
-
-template <typename T, typename F>
-struct call_traits<T, void(F),
-  typename enable_if<
-    (
-      !can_tag_invoke<impl, T, F>::value
-      &&
-      !execute_member<T, F>::is_valid
-      &&
-      execute_free<T, F>::is_valid
-    )
-  >::type> :
-  execute_free<T, F>
-{
-  ASIO_STATIC_CONSTEXPR(overload_type, overload = call_free);
-};
-
-template <typename T, typename F>
-struct call_traits<T, void(F),
-  typename enable_if<
-    (
-      !can_tag_invoke<impl, T, F>::value
-      &&
-      !execute_member<T, F>::is_valid
-      &&
-      !execute_free<T, F>::is_valid
       &&
       conditional<true, true_type,
        typename result_of<typename decay<F>::type&()>::type
@@ -212,34 +165,6 @@ struct impl
       call_traits<T, void(F)>::is_noexcept))
   {
     return asio::tag_invokes::tag_invoke(*this, ASIO_MOVE_CAST(T)(t), ASIO_MOVE_CAST(F)(f));
-  }
-
-  template <typename T, typename F>
-  ASIO_CONSTEXPR typename enable_if<
-    call_traits<T, void(F)>::overload == call_member,
-    typename call_traits<T, void(F)>::result_type
-  >::type
-  operator()(
-      ASIO_MOVE_ARG(T) t,
-      ASIO_MOVE_ARG(F) f) const
-    ASIO_NOEXCEPT_IF((
-      call_traits<T, void(F)>::is_noexcept))
-  {
-    return ASIO_MOVE_CAST(T)(t).execute(ASIO_MOVE_CAST(F)(f));
-  }
-
-  template <typename T, typename F>
-  ASIO_CONSTEXPR typename enable_if<
-    call_traits<T, void(F)>::overload == call_free,
-    typename call_traits<T, void(F)>::result_type
-  >::type
-  operator()(
-      ASIO_MOVE_ARG(T) t,
-      ASIO_MOVE_ARG(F) f) const
-    ASIO_NOEXCEPT_IF((
-      call_traits<T, void(F)>::is_noexcept))
-  {
-    return execute(ASIO_MOVE_CAST(T)(t), ASIO_MOVE_CAST(F)(f));
   }
 
   template <typename T, typename F>

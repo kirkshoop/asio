@@ -38,59 +38,23 @@ struct no_execute
 struct const_member_execute
 {
   template <typename F>
-  void execute(ASIO_MOVE_ARG(F) f) const
+  void tag_invoke(decltype(exec::execute), ASIO_MOVE_ARG(F) f) const
   {
     typename asio::decay<F>::type tmp(ASIO_MOVE_CAST(F)(f));
     tmp();
   }
 };
 
-#if !defined(ASIO_HAS_DEDUCED_EXECUTE_MEMBER_TRAIT)
-
-namespace asio {
-namespace traits {
-
-template <typename F>
-struct execute_member<const_member_execute, F>
-{
-  ASIO_STATIC_CONSTEXPR(bool, is_valid = true);
-  ASIO_STATIC_CONSTEXPR(bool, is_noexcept = false);
-  typedef void result_type;
-};
-
-} // namespace traits
-} // namespace asio
-
-#endif // !defined(ASIO_HAS_DEDUCED_EXECUTE_MEMBER_TRAIT)
-
 struct free_execute_const_executor
 {
   template <typename F>
-  friend void execute(const free_execute_const_executor&,
+  friend void tag_invoke(decltype(exec::execute), const free_execute_const_executor&,
       ASIO_MOVE_ARG(F) f)
   {
     typename asio::decay<F>::type tmp(ASIO_MOVE_CAST(F)(f));
     tmp();
   }
 };
-
-#if !defined(ASIO_HAS_DEDUCED_EXECUTE_FREE_TRAIT)
-
-namespace asio {
-namespace traits {
-
-template <typename F>
-struct execute_free<free_execute_const_executor, F>
-{
-  ASIO_STATIC_CONSTEXPR(bool, is_valid = true);
-  ASIO_STATIC_CONSTEXPR(bool, is_noexcept = false);
-  typedef void result_type;
-};
-
-} // namespace traits
-} // namespace asio
-
-#endif // !defined(ASIO_HAS_DEDUCED_EXECUTE_FREE_TRAIT)
 
 #if defined(ASIO_HAS_MOVE)
 
@@ -101,91 +65,23 @@ struct execute_free<free_execute_const_executor, F>
 struct non_const_member_execute
 {
   template <typename F>
-  void execute(ASIO_MOVE_ARG(F) f)
+  void tag_invoke(decltype(exec::execute), ASIO_MOVE_ARG(F) f)
   {
     typename asio::decay<F>::type tmp(ASIO_MOVE_CAST(F)(f));
     tmp();
   }
 };
 
-#if !defined(ASIO_HAS_DEDUCED_EXECUTE_MEMBER_TRAIT)
-
-namespace asio {
-namespace traits {
-
-template <typename F>
-struct execute_member<non_const_member_execute, F>
-{
-  ASIO_STATIC_CONSTEXPR(bool, is_valid = true);
-  ASIO_STATIC_CONSTEXPR(bool, is_noexcept = false);
-  typedef void result_type;
-};
-
-template <typename F>
-struct execute_member<const non_const_member_execute, F>
-{
-  ASIO_STATIC_CONSTEXPR(bool, is_valid = false);
-  ASIO_STATIC_CONSTEXPR(bool, is_noexcept = false);
-  typedef void result_type;
-};
-
-template <typename F>
-struct execute_member<const non_const_member_execute&, F>
-{
-  ASIO_STATIC_CONSTEXPR(bool, is_valid = false);
-  ASIO_STATIC_CONSTEXPR(bool, is_noexcept = false);
-  typedef void result_type;
-};
-
-} // namespace traits
-} // namespace asio
-
-#endif // !defined(ASIO_HAS_DEDUCED_EXECUTE_MEMBER_TRAIT)
-
 struct free_execute_non_const_executor
 {
   template <typename F>
-  friend void execute(free_execute_non_const_executor&,
+  friend void tag_invoke(decltype(exec::execute), free_execute_non_const_executor&,
       ASIO_MOVE_ARG(F) f)
   {
     typename asio::decay<F>::type tmp(ASIO_MOVE_CAST(F)(f));
     tmp();
   }
 };
-
-#if !defined(ASIO_HAS_DEDUCED_EXECUTE_FREE_TRAIT)
-
-namespace asio {
-namespace traits {
-
-template <typename F>
-struct execute_free<free_execute_non_const_executor, F>
-{
-  ASIO_STATIC_CONSTEXPR(bool, is_valid = true);
-  ASIO_STATIC_CONSTEXPR(bool, is_noexcept = false);
-  typedef void result_type;
-};
-
-template <typename F>
-struct execute_free<const free_execute_non_const_executor, F>
-{
-  ASIO_STATIC_CONSTEXPR(bool, is_valid = false);
-  ASIO_STATIC_CONSTEXPR(bool, is_noexcept = false);
-  typedef void result_type;
-};
-
-template <typename F>
-struct execute_free<const free_execute_non_const_executor&, F>
-{
-  ASIO_STATIC_CONSTEXPR(bool, is_valid = false);
-  ASIO_STATIC_CONSTEXPR(bool, is_noexcept = false);
-  typedef void result_type;
-};
-
-} // namespace traits
-} // namespace asio
-
-#endif // !defined(ASIO_HAS_DEDUCED_EXECUTE_FREE_TRAIT)
 
 #endif // defined(ASIO_HAS_MOVE)
 

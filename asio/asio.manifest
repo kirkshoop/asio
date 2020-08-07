@@ -4913,8 +4913,6 @@
 /include/asio/time_traits.hpp
 /include/asio/traits/
 /include/asio/traits/equality_comparable.hpp
-/include/asio/traits/execute_free.hpp
-/include/asio/traits/execute_member.hpp
 /include/asio/traits/prefer_free.hpp
 /include/asio/traits/prefer_member.hpp
 /include/asio/traits/query_free.hpp

@@ -170,7 +170,7 @@ public:
   }
 
   template <class Func>
-  void execute(Func f) const
+  void tag_invoke(decltype(execution::execute), Func f) const
   {
     auto p(std::make_shared<function<Func>>(std::move(f), work_count_));
     context_.do_execute(p, work_count_);

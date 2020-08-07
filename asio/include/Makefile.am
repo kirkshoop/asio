@@ -504,8 +504,6 @@ nobase_include_HEADERS = \
 	asio/time_traits.hpp \
 	asio/tag_invokes/tag_invoke.hpp \
 	asio/traits/equality_comparable.hpp \
-	asio/traits/execute_free.hpp \
-	asio/traits/execute_member.hpp \
 	asio/traits/prefer_free.hpp \
 	asio/traits/prefer_member.hpp \
 	asio/traits/query_free.hpp \

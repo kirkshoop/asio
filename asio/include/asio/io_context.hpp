@@ -1015,7 +1015,7 @@ public:
    * execution::execute(ex, my_function_object); @endcode
    */
   template <typename Function>
-  void execute(ASIO_MOVE_ARG(Function) f) const;
+  void tag_invoke(decltype(execution::execute), ASIO_MOVE_ARG(Function) f) const;
 
 #if !defined(ASIO_NO_TS_EXECUTORS)
   /// Obtain the underlying execution context.
@@ -1268,21 +1268,6 @@ struct equality_comparable<
 };
 
 #endif // !defined(ASIO_HAS_DEDUCED_EQUALITY_COMPARABLE_TRAIT)
-
-#if !defined(ASIO_HAS_DEDUCED_EXECUTE_MEMBER_TRAIT)
-
-template <typename Allocator, unsigned int Bits, typename Function>
-struct execute_member<
-    asio::io_context::basic_executor_type<Allocator, Bits>,
-    Function
-  >
-{
-  ASIO_STATIC_CONSTEXPR(bool, is_valid = true);
-  ASIO_STATIC_CONSTEXPR(bool, is_noexcept = false);
-  typedef void result_type;
-};
-
-#endif // !defined(ASIO_HAS_DEDUCED_EXECUTE_MEMBER_TRAIT)
 
 #if !defined(ASIO_HAS_DEDUCED_REQUIRE_MEMBER_TRAIT)
 

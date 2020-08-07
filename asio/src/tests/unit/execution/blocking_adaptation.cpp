@@ -30,7 +30,7 @@ typedef exec::blocking_adaptation_t::allowed_t n2;
 struct ex_nq_nr
 {
   template <typename F>
-  void execute(const F&) const
+  void tag_invoke(decltype(exec::execute), const F&) const
   {
   }
 
@@ -59,19 +59,6 @@ struct equality_comparable<ex_nq_nr>
 
 #endif // !defined(ASIO_HAS_DEDUCED_EQUALITY_COMPARABLE_TRAIT)
 
-#if !defined(ASIO_HAS_DEDUCED_EXECUTE_MEMBER_TRAIT)
-
-template <typename Function>
-struct execute_member<ex_nq_nr, Function>
-{
-  ASIO_STATIC_CONSTEXPR(bool, is_valid = true);
-  ASIO_STATIC_CONSTEXPR(bool, is_noexcept = false);
-
-  typedef void result_type;
-};
-
-#endif // !defined(ASIO_HAS_DEDUCED_EXECUTE_MEMBER_TRAIT)
-
 } // namespace traits
 } // namespace asio
 
@@ -84,7 +71,7 @@ struct ex_cq_nr
   }
 
   template <typename F>
-  void execute(const F&) const
+  void tag_invoke(decltype(exec::execute), const F&) const
   {
   }
 
@@ -112,20 +99,6 @@ struct equality_comparable<ex_cq_nr<ResultType, ParamType, Result> >
 };
 
 #endif // !defined(ASIO_HAS_DEDUCED_EQUALITY_COMPARABLE_TRAIT)
-
-#if !defined(ASIO_HAS_DEDUCED_EXECUTE_MEMBER_TRAIT)
-
-template <typename ResultType, typename ParamType,
-    typename Result, typename Function>
-struct execute_member<ex_cq_nr<ResultType, ParamType, Result>, Function>
-{
-  ASIO_STATIC_CONSTEXPR(bool, is_valid = true);
-  ASIO_STATIC_CONSTEXPR(bool, is_noexcept = false);
-
-  typedef void result_type;
-};
-
-#endif // !defined(ASIO_HAS_DEDUCED_EXECUTE_MEMBER_TRAIT)
 
 #if !defined(ASIO_HAS_DEDUCED_QUERY_STATIC_CONSTEXPR_MEMBER_TRAIT)
 
@@ -162,7 +135,7 @@ struct ex_mq_nr
   }
 
   template <typename F>
-  void execute(const F&) const
+  void tag_invoke(decltype(exec::execute), const F&) const
   {
   }
 
@@ -190,20 +163,6 @@ struct equality_comparable<ex_mq_nr<ResultType, ParamType, Result> >
 };
 
 #endif // !defined(ASIO_HAS_DEDUCED_EQUALITY_COMPARABLE_TRAIT)
-
-#if !defined(ASIO_HAS_DEDUCED_EXECUTE_MEMBER_TRAIT)
-
-template <typename ResultType, typename ParamType,
-    typename Result, typename Function>
-struct execute_member<ex_mq_nr<ResultType, ParamType, Result>, Function>
-{
-  ASIO_STATIC_CONSTEXPR(bool, is_valid = true);
-  ASIO_STATIC_CONSTEXPR(bool, is_noexcept = false);
-
-  typedef void result_type;
-};
-
-#endif // !defined(ASIO_HAS_DEDUCED_EXECUTE_MEMBER_TRAIT)
 
 #if !defined(ASIO_HAS_DEDUCED_QUERY_MEMBER_TRAIT)
 
@@ -235,7 +194,7 @@ struct ex_fq_nr
   }
 
   template <typename F>
-  void execute(const F&) const
+  void tag_invoke(decltype(exec::execute), const F&) const
   {
   }
 
@@ -263,20 +222,6 @@ struct equality_comparable<ex_fq_nr<ResultType, ParamType, Result> >
 };
 
 #endif // !defined(ASIO_HAS_DEDUCED_EQUALITY_COMPARABLE_TRAIT)
-
-#if !defined(ASIO_HAS_DEDUCED_EXECUTE_MEMBER_TRAIT)
-
-template <typename ResultType, typename ParamType,
-    typename Result, typename Function>
-struct execute_member<ex_fq_nr<ResultType, ParamType, Result>, Function>
-{
-  ASIO_STATIC_CONSTEXPR(bool, is_valid = true);
-  ASIO_STATIC_CONSTEXPR(bool, is_noexcept = false);
-
-  typedef void result_type;
-};
-
-#endif // !defined(ASIO_HAS_DEDUCED_EXECUTE_MEMBER_TRAIT)
 
 #if !defined(ASIO_HAS_DEDUCED_QUERY_FREE_TRAIT)
 
@@ -325,7 +270,7 @@ struct ex_mq_mr
   }
 
   template <typename F>
-  void execute(const F&) const
+  void tag_invoke(decltype(exec::execute), const F&) const
   {
   }
 
@@ -355,7 +300,7 @@ struct ex_mq_mr<CurrentType, CurrentType>
   }
 
   template <typename F>
-  void execute(const F&) const
+  void tag_invoke(decltype(exec::execute), const F&) const
   {
   }
 
@@ -383,19 +328,6 @@ struct equality_comparable<ex_mq_mr<CurrentType, OtherType> >
 };
 
 #endif // !defined(ASIO_HAS_DEDUCED_EQUALITY_COMPARABLE_TRAIT)
-
-#if !defined(ASIO_HAS_DEDUCED_EXECUTE_MEMBER_TRAIT)
-
-template <typename CurrentType, typename OtherType, typename Function>
-struct execute_member<ex_mq_mr<CurrentType, OtherType>, Function>
-{
-  ASIO_STATIC_CONSTEXPR(bool, is_valid = true);
-  ASIO_STATIC_CONSTEXPR(bool, is_noexcept = false);
-
-  typedef void result_type;
-};
-
-#endif // !defined(ASIO_HAS_DEDUCED_EXECUTE_MEMBER_TRAIT)
 
 #if !defined(ASIO_HAS_DEDUCED_QUERY_MEMBER_TRAIT)
 
@@ -487,7 +419,7 @@ struct ex_fq_fr
   }
 
   template <typename F>
-  void execute(const F&) const
+  void tag_invoke(decltype(exec::execute), const F&) const
   {
   }
 
@@ -523,7 +455,7 @@ struct ex_fq_fr<CurrentType, CurrentType>
   }
 
   template <typename F>
-  void execute(const F&) const
+  void tag_invoke(decltype(exec::execute), const F&) const
   {
   }
 
@@ -551,19 +483,6 @@ struct equality_comparable<ex_fq_fr<CurrentType, OtherType> >
 };
 
 #endif // !defined(ASIO_HAS_DEDUCED_EQUALITY_COMPARABLE_TRAIT)
-
-#if !defined(ASIO_HAS_DEDUCED_EXECUTE_MEMBER_TRAIT)
-
-template <typename CurrentType, typename OtherType, typename Function>
-struct execute_member<ex_fq_fr<CurrentType, OtherType>, Function>
-{
-  ASIO_STATIC_CONSTEXPR(bool, is_valid = true);
-  ASIO_STATIC_CONSTEXPR(bool, is_noexcept = false);
-
-  typedef void result_type;
-};
-
-#endif // !defined(ASIO_HAS_DEDUCED_EXECUTE_MEMBER_TRAIT)
 
 #if !defined(ASIO_HAS_DEDUCED_QUERY_FREE_TRAIT)
 

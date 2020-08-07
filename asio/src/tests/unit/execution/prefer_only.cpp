@@ -39,7 +39,7 @@ static int never_blocking_count = 0;
 struct possibly_blocking_executor
 {
   template <typename F>
-  void execute(const F&) const
+  void tag_invoke(decltype(asio::execution::execute), const F&) const
   {
     ++possibly_blocking_count;
   }
@@ -59,18 +59,6 @@ struct possibly_blocking_executor
 
 namespace asio {
 namespace traits {
-
-#if !defined(ASIO_HAS_DEDUCED_EXECUTE_MEMBER_TRAIT)
-
-template <typename F>
-struct execute_member<possibly_blocking_executor, F>
-{
-  ASIO_STATIC_CONSTEXPR(bool, is_valid = true);
-  ASIO_STATIC_CONSTEXPR(bool, is_noexcept = true);
-  typedef void result_type;
-};
-
-#endif // !defined(ASIO_HAS_DEDUCED_EXECUTE_MEMBER_TRAIT)
 
 #if !defined(ASIO_HAS_DEDUCED_EQUALITY_COMPARABLE_TRAIT)
 
@@ -95,7 +83,7 @@ struct never_blocking_executor
   }
 
   template <typename F>
-  void execute(const F&) const
+  void tag_invoke(decltype(asio::execution::execute), const F&) const
   {
     ++never_blocking_count;
   }
@@ -115,18 +103,6 @@ struct never_blocking_executor
 
 namespace asio {
 namespace traits {
-
-#if !defined(ASIO_HAS_DEDUCED_EXECUTE_MEMBER_TRAIT)
-
-template <typename F>
-struct execute_member<never_blocking_executor, F>
-{
-  ASIO_STATIC_CONSTEXPR(bool, is_valid = true);
-  ASIO_STATIC_CONSTEXPR(bool, is_noexcept = true);
-  typedef void result_type;
-};
-
-#endif // !defined(ASIO_HAS_DEDUCED_EXECUTE_MEMBER_TRAIT)
 
 #if !defined(ASIO_HAS_DEDUCED_EQUALITY_COMPARABLE_TRAIT)
 
@@ -189,7 +165,7 @@ struct either_blocking_executor
   }
 
   template <typename F>
-  void execute(const F&) const
+  void tag_invoke(decltype(asio::execution::execute), const F&) const
   {
     if (blocking_ == execution::blocking.never)
       ++never_blocking_count;
@@ -212,18 +188,6 @@ struct either_blocking_executor
 
 namespace asio {
 namespace traits {
-
-#if !defined(ASIO_HAS_DEDUCED_EXECUTE_MEMBER_TRAIT)
-
-template <typename F>
-struct execute_member<either_blocking_executor, F>
-{
-  ASIO_STATIC_CONSTEXPR(bool, is_valid = true);
-  ASIO_STATIC_CONSTEXPR(bool, is_noexcept = true);
-  typedef void result_type;
-};
-
-#endif // !defined(ASIO_HAS_DEDUCED_EXECUTE_MEMBER_TRAIT)
 
 #if !defined(ASIO_HAS_DEDUCED_EQUALITY_COMPARABLE_TRAIT)
 

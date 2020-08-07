@@ -272,7 +272,7 @@ public:
   template <typename Function>
   typename enable_if<
     execution::can_execute<const Executor&, Function>::value
-  >::type execute(ASIO_MOVE_ARG(Function) f) const
+  >::type tag_invoke(decltype(execution::execute), ASIO_MOVE_ARG(Function) f) const
   {
     detail::strand_executor_service::execute(impl_,
         executor_, ASIO_MOVE_CAST(Function)(f));
@@ -453,18 +453,6 @@ struct equality_comparable<strand<Executor> >
 };
 
 #endif // !defined(ASIO_HAS_DEDUCED_EQUALITY_COMPARABLE_TRAIT)
-
-#if !defined(ASIO_HAS_DEDUCED_EXECUTE_MEMBER_TRAIT)
-
-template <typename Executor, typename Function>
-struct execute_member<strand<Executor>, Function>
-{
-  ASIO_STATIC_CONSTEXPR(bool, is_valid = true);
-  ASIO_STATIC_CONSTEXPR(bool, is_noexcept = false);
-  typedef void result_type;
-};
-
-#endif // !defined(ASIO_HAS_DEDUCED_EXECUTE_MEMBER_TRAIT)
 
 #if !defined(ASIO_HAS_DEDUCED_QUERY_MEMBER_TRAIT)
 

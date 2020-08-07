@@ -229,7 +229,7 @@ public:
   }
 
   template <typename F>
-  void execute(ASIO_MOVE_ARG(F) f) const
+  void tag_invoke(decltype(execution::execute), ASIO_MOVE_ARG(F) f) const
   {
     execution::execute(
         asio::require(system_executor(), Blocking()),
@@ -949,19 +949,6 @@ struct equality_comparable<
 };
 
 #endif // !defined(ASIO_HAS_DEDUCED_EQUALITY_COMPARABLE_TRAIT)
-
-#if !defined(ASIO_HAS_DEDUCED_EXECUTE_MEMBER_TRAIT)
-
-template <typename T, typename Blocking, typename Function>
-struct execute_member<
-    asio::detail::promise_executor<T, Blocking>, Function>
-{
-  ASIO_STATIC_CONSTEXPR(bool, is_valid = true);
-  ASIO_STATIC_CONSTEXPR(bool, is_noexcept = false);
-  typedef void result_type;
-};
-
-#endif // !defined(ASIO_HAS_DEDUCED_EXECUTE_MEMBER_TRAIT)
 
 #if !defined(ASIO_HAS_DEDUCED_QUERY_STATIC_CONSTEXPR_TRAIT)
 

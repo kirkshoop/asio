@@ -308,7 +308,7 @@ public:
    * execution::execute(ex, my_function_object); @endcode
    */
   template <typename Function>
-  void execute(ASIO_MOVE_ARG(Function) f) const
+  void tag_invoke(decltype(execution::execute), ASIO_MOVE_ARG(Function) f) const
   {
     this->do_execute(ASIO_MOVE_CAST(Function)(f), Blocking());
   }
@@ -438,22 +438,6 @@ struct equality_comparable<
 };
 
 #endif // !defined(ASIO_HAS_DEDUCED_EQUALITY_COMPARABLE_TRAIT)
-
-#if !defined(ASIO_HAS_DEDUCED_EXECUTE_MEMBER_TRAIT)
-
-template <typename Blocking, typename Relationship,
-    typename Allocator, typename Function>
-struct execute_member<
-    asio::basic_system_executor<Blocking, Relationship, Allocator>,
-    Function
-  >
-{
-  ASIO_STATIC_CONSTEXPR(bool, is_valid = true);
-  ASIO_STATIC_CONSTEXPR(bool, is_noexcept = false);
-  typedef void result_type;
-};
-
-#endif // !defined(ASIO_HAS_DEDUCED_EXECUTE_MEMBER_TRAIT)
 
 #if !defined(ASIO_HAS_DEDUCED_REQUIRE_MEMBER_TRAIT)
 

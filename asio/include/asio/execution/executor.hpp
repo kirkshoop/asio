@@ -21,12 +21,12 @@
 #include "asio/execution/invocable_archetype.hpp"
 #include "asio/traits/equality_comparable.hpp"
 
-#if defined(ASIO_HAS_DEDUCED_EXECUTE_FREE_TRAIT) \
-  && defined(ASIO_HAS_DEDUCED_EXECUTE_MEMBER_TRAIT) \
+#if defined(ASIO_HAS_DEDUCED_TAG_INVOKE_FREE_TRAIT) \
+  && defined(ASIO_HAS_DEDUCED_TAG_INVOKE_MEMBER_TRAIT) \
   && defined(ASIO_HAS_DEDUCED_EQUALITY_COMPARABLE_TRAIT)
 # define ASIO_HAS_DEDUCED_EXECUTION_IS_EXECUTOR_TRAIT 1
-#endif // defined(ASIO_HAS_DEDUCED_EXECUTE_FREE_TRAIT)
-       //   && defined(ASIO_HAS_DEDUCED_EXECUTE_MEMBER_TRAIT)
+#endif // defined(ASIO_HAS_DEDUCED_TAG_INVOKE_FREE_TRAIT)
+       //   && defined(ASIO_HAS_DEDUCED_TAG_INVOKE_MEMBER_TRAIT)
        //   && defined(ASIO_HAS_DEDUCED_EQUALITY_COMPARABLE_TRAIT)
 
 #include "asio/detail/push_options.hpp"

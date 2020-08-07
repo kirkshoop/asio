@@ -72,7 +72,7 @@ public:
   }
 
   template <class Func>
-  void execute(Func f) const
+  void tag_invoke(decltype(execution::execute), Func f) const
   {
     thread_bag& bag = use_service<thread_bag>(query(execution::context));
     bag.add_thread(std::thread(std::move(f)));

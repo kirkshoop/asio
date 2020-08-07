@@ -43,7 +43,7 @@ struct fat_executor
   }
 
   template <typename F>
-  void execute(const F&) const
+  void tag_invoke(decltype(execution::execute), const F&) const
   {
   }
 
@@ -70,18 +70,6 @@ struct fat_executor
 
 namespace asio {
 namespace traits {
-
-#if !defined(ASIO_HAS_DEDUCED_EXECUTE_MEMBER_TRAIT)
-
-template <typename F>
-struct execute_member<fat_executor, F>
-{
-  ASIO_STATIC_CONSTEXPR(bool, is_valid = true);
-  ASIO_STATIC_CONSTEXPR(bool, is_noexcept = true);
-  typedef void result_type;
-};
-
-#endif // !defined(ASIO_HAS_DEDUCED_EXECUTE_MEMBER_TRAIT)
 
 #if !defined(ASIO_HAS_DEDUCED_QUERY_MEMBER_TRAIT)
 

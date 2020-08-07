@@ -31,7 +31,7 @@ typedef exec::mapping_t::other_t n3;
 struct ex_nq_nr
 {
   template <typename F>
-  void execute(const F&) const
+  void tag_invoke(decltype(exec::execute), const F&) const
   {
   }
 
@@ -70,7 +70,7 @@ struct ex_cq_nr
   }
 
   template <typename F>
-  void execute(const F&) const
+  void tag_invoke(decltype(exec::execute), const F&) const
   {
   }
 
@@ -139,7 +139,7 @@ struct ex_mq_nr
   }
 
   template <typename F>
-  void execute(const F&) const
+  void tag_invoke(decltype(exec::execute), const F&) const
   {
   }
 
@@ -203,7 +203,7 @@ struct ex_fq_nr
   }
 
   template <typename F>
-  void execute(const F&) const
+  void tag_invoke(decltype(exec::execute), const F&) const
   {
   }
 
@@ -284,7 +284,7 @@ struct ex_mq_mr
   }
 
   template <typename F>
-  void execute(const F&) const
+  void tag_invoke(decltype(exec::execute), const F&) const
   {
   }
 
@@ -314,7 +314,7 @@ struct ex_mq_mr<CurrentType, CurrentType>
   }
 
   template <typename F>
-  void execute(const F&) const
+  void tag_invoke(decltype(exec::execute), const F&) const
   {
   }
 
@@ -438,7 +438,7 @@ struct ex_fq_fr
   }
 
   template <typename F>
-  void execute(const F&) const
+  void tag_invoke(decltype(exec::execute), const F&) const
   {
   }
 
@@ -474,7 +474,7 @@ struct ex_fq_fr<CurrentType, CurrentType>
   }
 
   template <typename F>
-  void execute(const F&) const
+  void tag_invoke(decltype(exec::execute), const F&) const
   {
   }
 
