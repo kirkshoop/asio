@@ -7,4 +7,5 @@
 *.manifest
 *.pdb
 *.tds
+any_ref
 tag_invoke

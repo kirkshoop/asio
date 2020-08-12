@@ -223,6 +223,7 @@ UNIT_TEST_EXES = \
 	tests\unit\system_context.exe \
 	tests\unit\system_executor.exe \
 	tests\unit\system_timer.exe \
+	tests\unit\tag_invokes\any_ref.exe \
 	tests\unit\tag_invokes\tag_invoke.exe \
 	tests\unit\this_coro.exe \
 	tests\unit\thread.exe \

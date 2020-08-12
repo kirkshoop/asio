@@ -286,6 +286,29 @@
   typename decay<T5>::type, typename decay<T6>::type, \
   typename decay<T7>::type, typename decay<T8>::type
 
+# define ASIO_VARIADIC_APPLY(m, n) \
+  ASIO_VARIADIC_APPLY_##n(m)
+
+# define ASIO_VARIADIC_APPLY_1(m) \
+  m(1)
+# define ASIO_VARIADIC_APPLY_2(m) \
+  m(1), m(2)
+# define ASIO_VARIADIC_APPLY_3(m) \
+  m(1), m(2), m(3)
+# define ASIO_VARIADIC_APPLY_4(m) \
+  m(1), m(2), m(3), m(4)
+# define ASIO_VARIADIC_APPLY_5(m) \
+  m(1), m(2), m(3), m(4), m(5)
+# define ASIO_VARIADIC_APPLY_6(m) \
+  m(1), m(2), m(3), m(4), m(5),   \
+  m(6)
+# define ASIO_VARIADIC_APPLY_7(m) \
+  m(1), m(2), m(3), m(4), m(5),   \
+  m(6), m(7)
+# define ASIO_VARIADIC_APPLY_8(m) \
+  m(1), m(2), m(3), m(4), m(5),   \
+  m(6), m(7), m(8)
+
 # define ASIO_VARIADIC_GENERATE(m) m(1) m(2) m(3) m(4) m(5) m(6) m(7) m(8)
 # define ASIO_VARIADIC_GENERATE_5(m) m(1) m(2) m(3) m(4) m(5)
 

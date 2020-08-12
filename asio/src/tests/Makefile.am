@@ -129,6 +129,7 @@ check_PROGRAMS = \
 	unit/system_context \
 	unit/system_executor \
 	unit/system_timer \
+	unit/tag_invokes/any_ref \
 	unit/tag_invokes/tag_invoke \
 	unit/this_coro \
 	unit/thread \
@@ -291,6 +292,7 @@ TESTS = \
 	unit/system_context \
 	unit/system_executor \
 	unit/system_timer \
+	unit/tag_invokes/any_ref \
 	unit/tag_invokes/tag_invoke \
 	unit/this_coro \
 	unit/thread \
@@ -463,6 +465,7 @@ unit_streambuf_SOURCES = unit/streambuf.cpp
 unit_system_context_SOURCES = unit/system_context.cpp
 unit_system_executor_SOURCES = unit/system_executor.cpp
 unit_system_timer_SOURCES = unit/system_timer.cpp
+unit_tag_invokes_any_ref_SOURCES = unit/tag_invokes/any_ref.cpp
 unit_tag_invokes_tag_invoke_SOURCES = unit/tag_invokes/tag_invoke.cpp
 unit_this_coro_SOURCES = unit/this_coro.cpp
 unit_thread_SOURCES = unit/thread.cpp

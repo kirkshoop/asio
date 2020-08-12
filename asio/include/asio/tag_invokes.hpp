@@ -16,5 +16,10 @@
 #endif // defined(_MSC_VER) && (_MSC_VER >= 1200)
 
 #include "asio/tag_invokes/tag_invoke.hpp"
+#include "asio/tag_invokes/bad_target.hpp"
+#include "asio/tag_invokes/overload.hpp"
+#include "asio/tag_invokes/vtable.hpp"
+#include "asio/tag_invokes/any_base.hpp"
+#include "asio/tag_invokes/any_ref.hpp"
 
 #endif // ASIO_TAG_INVOKES_HPP

@@ -424,7 +424,7 @@ struct can_tag_invoke :
 #if defined(ASIO_HAS_VARIABLE_TEMPLATES)
 
 template <typename CPO, typename T, typename... Vs>
-constexpr bool can_tag_invoke_v = can_tag_invoke<CPO, T, Vs...>::value;
+ASIO_CONSTEXPR bool can_tag_invoke_v = can_tag_invoke<CPO, T, Vs...>::value;
 
 #endif // defined(ASIO_HAS_VARIABLE_TEMPLATES)
 
@@ -438,7 +438,7 @@ struct is_nothrow_tag_invoke :
 #if defined(ASIO_HAS_VARIABLE_TEMPLATES)
 
 template <typename CPO, typename T, typename... Vs>
-constexpr bool is_nothrow_tag_invoke_v
+ASIO_CONSTEXPR bool is_nothrow_tag_invoke_v
   = is_nothrow_tag_invoke<CPO, T, Vs...>::value;
 
 #endif // defined(ASIO_HAS_VARIABLE_TEMPLATES)

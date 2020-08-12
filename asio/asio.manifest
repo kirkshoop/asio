@@ -5604,6 +5604,7 @@
 /src/tests/unit/system_context.cpp
 /src/tests/unit/system_executor.cpp
 /src/tests/unit/system_timer.cpp
+/src/tests/unit/tag_invokes/any_ref.cpp
 /src/tests/unit/tag_invokes/tag_invoke.cpp
 /src/tests/unit/this_coro.cpp
 /src/tests/unit/thread.cpp
