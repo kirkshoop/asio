@@ -525,6 +525,11 @@ public:
     return allocator_;
   }
 
+  friend Allocator tag_invoke(decltype(execution::get_allocator), const basic_executor_type& self) ASIO_NOEXCEPT
+  {
+    return self.allocator_;
+  }
+
   /// Query the occupancy (recommended number of work items) for the pool.
   /**
    * Do not call this function directly. It is intended for use with the

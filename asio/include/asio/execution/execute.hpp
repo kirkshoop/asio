@@ -20,6 +20,10 @@
 #include "asio/execution/detail/as_invocable.hpp"
 #include "asio/execution/detail/as_receiver.hpp"
 #include "asio/tag_invokes/tag_invoke.hpp"
+#include "asio/tag_invokes/overload.hpp"
+#include "asio/tag_invokes/vtable.hpp"
+
+#include <functional>
 
 #include "asio/detail/push_options.hpp"
 
@@ -218,6 +222,13 @@ template <typename T, typename F>
 constexpr bool can_execute_v = can_execute<T, F>::value;
 
 #endif // defined(ASIO_HAS_VARIABLE_TEMPLATES)
+
+template <typename Function = std::function<void()>, typename Target = const asio::tag_invokes::target_&>
+struct execute_o
+{
+  typedef asio::tag_invokes::overload<asio_execution_execute_fn::impl, 
+    void(Target, Function)> type;
+};
 
 } // namespace execution
 } // namespace asio

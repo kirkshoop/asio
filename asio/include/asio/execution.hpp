@@ -16,6 +16,7 @@
 #endif // defined(_MSC_VER) && (_MSC_VER >= 1200)
 
 #include "asio/execution/allocator.hpp"
+#include "asio/execution/get_allocator.hpp"
 #include "asio/execution/any_executor.hpp"
 #include "asio/execution/bad_executor.hpp"
 #include "asio/execution/blocking.hpp"
