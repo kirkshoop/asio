@@ -539,6 +539,10 @@ public:
   {
     return static_cast<std::size_t>(pool_->num_threads_);
   }
+  std::size_t tag_invoke(decltype(execution::get_occupancy)) const ASIO_NOEXCEPT
+  {
+    return static_cast<std::size_t>(pool_->num_threads_);
+  }
 
   /// Determine whether the thread pool is running in the current thread.
   /**

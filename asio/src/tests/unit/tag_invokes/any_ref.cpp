@@ -18,6 +18,7 @@
 
 #include <cstring>
 #include "asio/thread_pool.hpp"
+#include "asio/execution/get_occupancy.hpp"
 #include "../unit_test.hpp"
 
 #if defined(ASIO_HAS_BOOST_BIND)
@@ -47,6 +48,11 @@ struct fat_executor
   {
   }
 
+  std::size_t tag_invoke(decltype(execution::get_occupancy)) const
+  {
+      return 1;
+  }
+
   friend bool operator==(const fat_executor& a,
       const fat_executor& b) ASIO_NOEXCEPT
   {
@@ -65,18 +71,6 @@ struct fat_executor
 
 namespace asio {
 namespace traits {
-
-#if !defined(ASIO_HAS_DEDUCED_QUERY_MEMBER_TRAIT)
-
-template <>
-struct query_member<fat_executor, tag_invokes::occupancy_t>
-{
-  ASIO_STATIC_CONSTEXPR(bool, is_valid = true);
-  ASIO_STATIC_CONSTEXPR(bool, is_noexcept = false);
-  typedef std::size_t result_type;
-};
-
-#endif // !defined(ASIO_HAS_DEDUCED_QUERY_MEMBER_TRAIT)
 
 #if !defined(ASIO_HAS_DEDUCED_EQUALITY_COMPARABLE_TRAIT)
 
@@ -98,18 +92,19 @@ void increment(int* count)
 }
 
 struct test_receiver {
-  int* count;
+  test_receiver(int* count) : count_(count) {}
+  int* count_;
   friend void tag_invoke(decltype(execution::set_value), test_receiver&& self, int, long, std::string)
   {
-    increment(self.count);
+    increment(self.count_);
   }
   friend void tag_invoke(decltype(execution::set_error), test_receiver&& self, std::exception_ptr) noexcept
   {
-    increment(self.count);
+    increment(self.count_);
   }
   friend void tag_invoke(decltype(execution::set_done), test_receiver&& self) noexcept
   {
-    increment(self.count);
+    increment(self.count_);
   }
 };
 
@@ -121,12 +116,12 @@ void any_ref_construction_test()
   asio::nullptr_t null_ptr = asio::nullptr_t();
 #else
   typedef tag_invokes::any_ref<
-      tag_invokes::blocking_t
+      execution::blocking_t
     > ex_one_prop_t;
 
   typedef tag_invokes::any_ref<
-      tag_invokes::blocking_t,
-      tag_invokes::occupancy_t
+      execution::blocking_t,
+      execution::occupancy_t
     > ex_two_props_t;
 
   thread_pool pool(1);
@@ -443,12 +438,12 @@ void any_ref_assignment_test()
   asio::nullptr_t null_ptr = asio::nullptr_t();
 #else
   typedef tag_invokes::any_ref<
-      tag_invokes::blocking_t
+      execution::blocking_t
     > ex_one_prop_t;
 
   typedef tag_invokes::any_ref<
-      tag_invokes::blocking_t,
-      tag_invokes::occupancy_t
+      execution::blocking_t,
+      execution::occupancy_t
     > ex_two_props_t;
 
   thread_pool pool(1);
@@ -725,12 +720,12 @@ void any_ref_swap_test()
   ex_no_props_t ex_no_props_1(pool1.executor());
 #else 
   typedef tag_invokes::any_ref<
-      tag_invokes::blocking_t
+      execution::blocking_t
     > ex_one_prop_t;
 
   typedef tag_invokes::any_ref<
-      tag_invokes::blocking_t,
-      tag_invokes::occupancy_t
+      execution::blocking_t,
+      execution::occupancy_t
     > ex_two_props_t;
 
   thread_pool pool1(1);
@@ -797,16 +792,17 @@ void any_ref_swap_test()
 
 void any_ref_query_test()
 {
-#if 0
   thread_pool pool(1);
   tag_invokes::any_ref<
-      execution::blocking_t,
-      execution::outstanding_work_t,
-      execution::relationship_t,
-      execution::mapping_t::thread_t,
-      execution::occupancy_t>
+    //   execution::blocking_t,
+    //   execution::outstanding_work_t,
+    //   execution::relationship_t,
+    //   execution::mapping_t::thread_t,
+      asio::tag_invokes::overload<decltype(execution::get_occupancy), 
+        std::size_t(const asio::tag_invokes::target_&)>>
     ex(pool.executor());
 
+#if 0
   ASIO_CHECK(
       asio::query(ex, asio::execution::blocking)
         == asio::execution::blocking.possibly);
@@ -835,10 +831,10 @@ void any_ref_query_test()
       asio::query(ex, asio::execution::mapping)
         == asio::execution::mapping.thread);
 
-  ASIO_CHECK(
-      asio::query(ex, asio::execution::occupancy)
-        == 1);
 #endif
+  ASIO_CHECK(
+      asio::execution::get_occupancy(ex)
+        == 1);
 }
 
 void any_ref_execute_test()
@@ -855,7 +851,7 @@ void any_ref_execute_test()
     asio::tag_invokes::overload<
       decltype(asio::execution::execute), 
       void(const asio::tag_invokes::target_&, std::function<void()>)>>
-    ex{};
+    ex;
 
   ex = pool.executor();
 
@@ -879,17 +875,17 @@ void any_ref_receiver_test()
     asio::tag_invokes::overload<
       decltype(asio::execution::set_done), 
       void(asio::tag_invokes::target_&&) noexcept>>
-    r{};
+    r;
 
-  r = test_receiver{&count};
+  r = test_receiver(&count);
   asio::execution::set_value(std::move(r), 0, 0L, "");
   ASIO_CHECK(count == 1);
 
-  r = test_receiver{&count};
+  r = test_receiver(&count);
   asio::execution::set_error(std::move(r), nullptr);
   ASIO_CHECK(count == 2);
 
-  r = test_receiver{&count};
+  r = test_receiver(&count);
   asio::execution::set_done(std::move(r));
   ASIO_CHECK(count == 3);
 }
