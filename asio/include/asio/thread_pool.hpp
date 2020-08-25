@@ -384,6 +384,14 @@ public:
         pool_, std::allocator<void>(), bits_);
   }
 
+  template <typename OtherAllocator>
+  friend basic_executor_type<OtherAllocator, Bits> 
+  tag_invoke(decltype(execution::set_allocator), const basic_executor_type& self, OtherAllocator a) ASIO_NOEXCEPT
+  {
+    return basic_executor_type<OtherAllocator, Bits>(
+        self.pool_, a, self.bits_);
+  }
+
   /// Query the current value of the @c bulk_guarantee property.
   /**
    * Do not call this function directly. It is intended for use with the

@@ -842,6 +842,24 @@ void any_ref_query_test()
         == std::allocator<void>{});
 }
 
+void any_ref_set_test()
+{
+  thread_pool pool(1);
+  tag_invokes::any_ref<
+      typename execution::execute_o<>::type,
+      typename execution::get_allocator_o<std::allocator<void>>::type,
+      typename execution::set_allocator_o<
+        tag_invokes::any_ref<
+          typename execution::execute_o<>::type,
+          typename execution::get_allocator_o<std::allocator<char>>::type>, 
+        std::allocator<char>>::type>
+    ex(pool.executor());
+
+  ASIO_CHECK(
+      asio::execution::set_allocator(ex, std::allocator<char>{})
+        == asio::execution::set_allocator(pool.executor(), std::allocator<char>{}));
+}
+
 void any_ref_execute_test()
 {
   int count = 0;
@@ -901,6 +919,7 @@ ASIO_TEST_SUITE
   ASIO_TEST_CASE(any_ref_construction_test)
   ASIO_TEST_CASE(any_ref_assignment_test)
   ASIO_TEST_CASE(any_ref_swap_test)
+  ASIO_TEST_CASE(any_ref_set_test)
   ASIO_TEST_CASE(any_ref_query_test)
   ASIO_TEST_CASE(any_ref_execute_test)
   ASIO_TEST_CASE(any_ref_receiver_test)
