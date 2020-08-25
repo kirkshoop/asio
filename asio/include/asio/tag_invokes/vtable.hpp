@@ -70,7 +70,7 @@ struct vtable_entry<CPO, Ret(TargetPlaceholder, ArgN...)> {
   }
 
   template <typename Target>
-  static auto check_target_fn(nullptr_t) 
+  static auto check_target_fn(std::nullptr_t) 
   -> typename conditional<true, true_type, 
       typename result_of<
         decltype(&vtable_entry::entry_fn<Target>)(cpo_t, void_target_t*, ArgN...)
@@ -139,7 +139,7 @@ struct vtable_entry<CPO, Ret(TargetPlaceholder, ArgN...) noexcept> {
   }
 
   template <typename Target>
-  static auto check_target_fn(nullptr_t) 
+  static auto check_target_fn(std::nullptr_t) 
   -> typename conditional<true, true_type, 
       typename result_of<
         decltype(&vtable_entry::entry_fn<Target>)(cpo_t, void_target_t*, ArgN...)
