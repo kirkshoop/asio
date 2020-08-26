@@ -453,6 +453,11 @@ public:
     return execution::mapping.thread;
   }
 
+  friend decltype(execution::thread_mapping) tag_invoke(decltype(execution::get_mapping), const basic_executor_type& self) ASIO_NOEXCEPT
+  {
+    return execution::thread_mapping;
+  }
+  
   /// Query the current value of the @c context property.
   /**
    * Do not call this function directly. It is intended for use with the

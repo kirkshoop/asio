@@ -34,6 +34,8 @@
 #include "asio/execution/executor.hpp"
 #include "asio/execution/invocable_archetype.hpp"
 #include "asio/execution/mapping.hpp"
+#include "asio/execution/get_mapping.hpp"
+#include "asio/execution/make_with_mapping.hpp"
 #include "asio/execution/occupancy.hpp"
 #include "asio/execution/get_occupancy.hpp"
 #include "asio/execution/operation_state.hpp"

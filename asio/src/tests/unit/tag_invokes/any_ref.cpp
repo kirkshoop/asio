@@ -797,12 +797,12 @@ void any_ref_query_test()
       typename execution::execute_o<>::type,
     //   execution::outstanding_work_t,
     //   execution::relationship_t,
-    //   execution::mapping_t::thread_t,
 #if defined(ASIO_HAS_VARIABLE_TEMPLATES)
       typename execution::get_context_as_o<thread_pool&>::type,
 #endif // defined(ASIO_HAS_VARIABLE_TEMPLATES)
       typename execution::get_allocator_o<std::allocator<void>>::type,
       typename execution::get_blocking_o<>::type,
+      typename execution::get_mapping_o<>::type,
       typename execution::get_occupancy_o<>::type>
     ex(pool.executor());
 
@@ -839,6 +839,10 @@ void any_ref_query_test()
   ASIO_CHECK(
       execution::get_blocking(ex)
         == execution::possibly_blocking);
+
+  ASIO_CHECK(
+      execution::get_mapping(ex)
+        == execution::thread_mapping);
 
 #if defined(ASIO_HAS_VARIABLE_TEMPLATES)
 
