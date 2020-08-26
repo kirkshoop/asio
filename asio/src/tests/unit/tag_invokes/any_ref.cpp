@@ -798,6 +798,7 @@ void any_ref_query_test()
     //   execution::outstanding_work_t,
     //   execution::relationship_t,
     //   execution::mapping_t::thread_t,
+      typename execution::get_context_o<thread_pool&>::type,
       typename execution::get_allocator_o<std::allocator<void>>::type,
       typename execution::get_blocking_o<>::type,
       typename execution::get_occupancy_o<>::type>
@@ -844,6 +845,8 @@ void any_ref_query_test()
   ASIO_CHECK(
       execution::get_blocking(ex)
         == execution::possibly_blocking);
+
+  ex = execution::get_context(ex).executor();
 }
 
 void any_ref_set_test()

@@ -28,6 +28,7 @@
 #include "asio/execution/bulk_guarantee.hpp"
 #include "asio/execution/connect.hpp"
 #include "asio/execution/context.hpp"
+#include "asio/execution/get_context.hpp"
 #include "asio/execution/context_as.hpp"
 #include "asio/execution/execute.hpp"
 #include "asio/execution/executor.hpp"

@@ -468,6 +468,11 @@ public:
     return *pool_;
   }
 
+  friend thread_pool& tag_invoke(decltype(execution::get_context), const basic_executor_type& self) ASIO_NOEXCEPT
+  {
+    return *self.pool_;
+  }
+
   /// Query the current value of the @c blocking property.
   /**
    * Do not call this function directly. It is intended for use with the
