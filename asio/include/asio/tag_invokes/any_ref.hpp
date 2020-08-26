@@ -201,7 +201,6 @@ struct can_tag_invoke<I, void(Cpo)>
   {
     ASIO_STATIC_CONSTEXPR(bool, value = true);
     typedef Cpo type;
-    // typedef typename asio::tag_invokes::tag_invoke_result<Cpo>::type tag_invoke_result_type;
     ASIO_STATIC_CONSTEXPR(std::size_t, index = I);
   };
 
@@ -839,12 +838,8 @@ public:
         conditional<
           !is_same<Target, any_ref>::value
             && !is_base_of<detail::any_ref_base, Target>::value,
-#if 1
           detail::is_valid_target<
             Target, void(Cpos...)>,
-#else
-          true_type,
-#endif
           false_type
         >::type::value
       >::type* = 0)
@@ -855,22 +850,9 @@ public:
   }
 
   template <typename... OtherCpos>
-  any_ref(any_ref<OtherCpos...> other,
-      typename enable_if<
-        conditional<
-          !is_same<
-            any_ref<OtherCpos...>,
-            any_ref
-          >::value,
-          typename detail::can_tag_invoke<
-            0, void(Cpos...)>::template is_valid_target<
-              any_ref<OtherCpos...> >,
-          false_type
-        >::type::value
-      >::type* = 0)
-    : detail::any_ref_base(ASIO_MOVE_CAST(
-          any_ref<OtherCpos...>)(other), true_type()),
-      cpo_fns_(cpo_fns_table<any_ref<OtherCpos...> >())
+  any_ref(any_ref<OtherCpos...> other)
+    : detail::any_ref_base(
+        static_cast<const detail::any_ref_base&>(other))
   {
   }
 
