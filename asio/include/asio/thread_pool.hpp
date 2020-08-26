@@ -468,7 +468,7 @@ public:
     return *pool_;
   }
 
-  friend thread_pool& tag_invoke(decltype(execution::get_context), const basic_executor_type& self) ASIO_NOEXCEPT
+  friend thread_pool& tag_invoke(decltype(execution::get_context_as<thread_pool&>), const basic_executor_type& self) ASIO_NOEXCEPT
   {
     return *self.pool_;
   }
