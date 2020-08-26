@@ -386,7 +386,7 @@ public:
 
   template <typename OtherAllocator>
   friend basic_executor_type<OtherAllocator, Bits> 
-  tag_invoke(decltype(execution::set_allocator), const basic_executor_type& self, OtherAllocator a) ASIO_NOEXCEPT
+  tag_invoke(decltype(execution::make_with_allocator), const basic_executor_type& self, OtherAllocator a) ASIO_NOEXCEPT
   {
     return basic_executor_type<OtherAllocator, Bits>(
         self.pool_, a, self.bits_);

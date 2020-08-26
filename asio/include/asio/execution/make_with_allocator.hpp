@@ -1,5 +1,5 @@
 //
-// execution/set_allocator.hpp
+// execution/make_with_allocator.hpp
 // ~~~~~~~~~~~~~~~~~~~~~~
 //
 // Copyright (c) 2003-2020 Christopher M. Kohlhoff (chris at kohlhoff dot com)
@@ -8,8 +8,8 @@
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#ifndef ASIO_EXECUTION_SET_ALLOCATOR_HPP
-#define ASIO_EXECUTION_SET_ALLOCATOR_HPP
+#ifndef ASIO_EXECUTION_MAKE_WITH_ALLOCATOR_HPP
+#define ASIO_EXECUTION_MAKE_WITH_ALLOCATOR_HPP
 
 #if defined(_MSC_VER) && (_MSC_VER >= 1200)
 # pragma once
@@ -30,29 +30,29 @@ namespace execution {
 
 /// A customisation point that supplies a target with an allocator value.
 /**
- * The name <tt>execution::set_allocator</tt> denotes a customisation point object.
- * The expression <tt>execution::set_allocator(T, A)</tt> for some subexpression
+ * The name <tt>execution::make_with_allocator</tt> denotes a customisation point object.
+ * The expression <tt>execution::make_with_allocator(T, A)</tt> for some subexpression
  * <tt>T</tt> is expression-equivalent to:
  *
- * @li <tt>set_allocator(T, A)</tt>, if that expression is valid, and if the expression 
- *   <tt>asio::tag_invokes::tag_invoke(set_allocator, T, A)</tt> is valid. If the function 
- *   selected by overload resolution does not return the same object with all existing 
- *   allocations replaced with allocations from <tt>A</tt>, the program is ill-formed with 
- *   no diagnostic required.
+ * @li <tt>make_with_allocator(T, A)</tt>, if that expression is valid, and if the expression 
+ *   <tt>asio::tag_invokes::tag_invoke(make_with_allocator, T, A)</tt> is valid. If the function 
+ *   selected by overload resolution does not return a new object that combines <tt>T</tt>'s 
+ *   implementation with the supplied <tt>A</tt> used for allocations, the program is ill-formed 
+ *   with no diagnostic required.
  *
- * @li Otherwise, <tt>execution::set_allocator(R, A)</tt> is ill-formed.
+ * @li Otherwise, <tt>execution::make_with_allocator(R, A)</tt> is ill-formed.
  */
-inline constexpr unspecified set_allocator = unspecified;
+inline constexpr unspecified make_with_allocator = unspecified;
 
-/// A type trait that determines whether a @c set_allocator expression is
+/// A type trait that determines whether a @c make_with_allocator expression is
 /// well-formed.
 /**
- * Class template @c can_set_allocator is a trait that is derived from
- * @c true_type if the expression <tt>execution::set_allocator(std::declval<T>(), std::declval<B>())</tt> 
+ * Class template @c can_make_with_allocator is a trait that is derived from
+ * @c true_type if the expression <tt>execution::make_with_allocator(std::declval<T>(), std::declval<A>())</tt> 
  * is well formed; otherwise @c false_type.
  */
-template <typename R, typename A>
-struct can_set_allocator :
+template <typename R, typename B>
+struct can_make_with_allocator :
   integral_constant<bool, automatically_determined>
 {
 };
@@ -62,7 +62,7 @@ struct can_set_allocator :
 
 #else // defined(GENERATING_DOCUMENTATION)
 
-namespace asio_execution_set_allocator_fn {
+namespace asio_execution_make_with_allocator_fn {
 
 using asio::decay;
 using asio::declval;
@@ -121,63 +121,63 @@ struct static_instance
 template <typename T>
 const T static_instance<T>::instance = {};
 
-} // namespace asio_execution_set_allocator_fn
+} // namespace asio_execution_make_with_allocator_fn
 namespace asio {
 namespace execution {
 namespace {
 
-static ASIO_CONSTEXPR const asio_execution_set_allocator_fn::impl&
-  set_allocator = asio_execution_set_allocator_fn::static_instance<>::instance;
+static ASIO_CONSTEXPR const asio_execution_make_with_allocator_fn::impl&
+  make_with_allocator = asio_execution_make_with_allocator_fn::static_instance<>::instance;
 
 } // namespace
 
 template <typename R, typename Allocator>
-struct can_set_allocator :
+struct can_make_with_allocator :
   integral_constant<bool,
-    asio::tag_invokes::can_tag_invoke<asio_execution_set_allocator_fn::impl, R, Allocator>::value>
+    asio::tag_invokes::can_tag_invoke<asio_execution_make_with_allocator_fn::impl, R, Allocator>::value>
 {
 };
 
 #if defined(ASIO_HAS_VARIABLE_TEMPLATES)
 
 template <typename R, typename Allocator>
-constexpr bool can_set_allocator_v = can_set_allocator<R, Allocator>::value;
+constexpr bool can_make_with_allocator_v = can_make_with_allocator<R, Allocator>::value;
 
 #endif // defined(ASIO_HAS_VARIABLE_TEMPLATES)
 
 template <typename R, typename Allocator>
-struct is_nothrow_set_allocator :
+struct is_nothrow_make_with_allocator :
   integral_constant<bool,
-    asio::tag_invokes::is_nothrow_tag_invoke<asio_execution_set_allocator_fn::impl, R, Allocator>::value>
+    asio::tag_invokes::is_nothrow_tag_invoke<asio_execution_make_with_allocator_fn::impl, R, Allocator>::value>
 {
 };
 
 #if defined(ASIO_HAS_VARIABLE_TEMPLATES)
 
 template <typename R, typename Allocator>
-constexpr bool is_nothrow_set_allocator_v
-  = is_nothrow_set_allocator<R, Allocator>::value;
+constexpr bool is_nothrow_make_with_allocator_v
+  = is_nothrow_make_with_allocator<R, Allocator>::value;
 
 #endif // defined(ASIO_HAS_VARIABLE_TEMPLATES)
 
 template <typename R, typename Allocator>
-struct set_allocator_result : 
-  asio::tag_invokes::tag_invoke_result<asio_execution_set_allocator_fn::impl, R, Allocator>
+struct make_with_allocator_result : 
+  asio::tag_invokes::tag_invoke_result<asio_execution_make_with_allocator_fn::impl, R, Allocator>
 {
 };
 
 #if defined(ASIO_HAS_ALIAS_TEMPLATES)
 
 template <typename R, typename Allocator>
-using set_allocator_result_t = typename set_allocator_result<R, Allocator>::type;
+using make_with_allocator_result_t = typename make_with_allocator_result<R, Allocator>::type;
 
 #endif // defined(ASIO_HAS_ALIAS_TEMPLATES)
 
-template <typename NewR, typename Allocator, typename Target = const asio::tag_invokes::target_&>
-struct set_allocator_o
+template <typename NewTarget, typename Allocator, typename Target = const asio::tag_invokes::target_&>
+struct make_with_allocator_o
 {
-  typedef asio::tag_invokes::overload<asio_execution_set_allocator_fn::impl, 
-    NewR(Target, Allocator)> type;
+  typedef asio::tag_invokes::overload<asio_execution_make_with_allocator_fn::impl, 
+    NewTarget(Target, Allocator)> type;
 };
 
 } // namespace execution
@@ -187,4 +187,4 @@ struct set_allocator_o
 
 #include "asio/detail/pop_options.hpp"
 
-#endif // ASIO_EXECUTION_SET_ALLOCATOR_HPP
+#endif // ASIO_EXECUTION_MAKE_WITH_ALLOCATOR_HPP

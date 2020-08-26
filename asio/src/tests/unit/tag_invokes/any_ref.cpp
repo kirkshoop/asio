@@ -848,7 +848,7 @@ void any_ref_set_test()
   tag_invokes::any_ref<
       typename execution::execute_o<>::type,
       typename execution::get_allocator_o<std::allocator<void>>::type,
-      typename execution::set_allocator_o<
+      typename execution::make_with_allocator_o<
         tag_invokes::any_ref<
           typename execution::execute_o<>::type,
           typename execution::get_allocator_o<std::allocator<char>>::type>, 
@@ -856,8 +856,8 @@ void any_ref_set_test()
     ex(pool.executor());
 
   ASIO_CHECK(
-      asio::execution::set_allocator(ex, std::allocator<char>{})
-        == asio::execution::set_allocator(pool.executor(), std::allocator<char>{}));
+      asio::execution::make_with_allocator(ex, std::allocator<char>{})
+        == asio::execution::make_with_allocator(pool.executor(), std::allocator<char>{}));
 }
 
 void any_ref_execute_test()
