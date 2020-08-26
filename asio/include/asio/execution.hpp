@@ -21,6 +21,8 @@
 #include "asio/execution/any_executor.hpp"
 #include "asio/execution/bad_executor.hpp"
 #include "asio/execution/blocking.hpp"
+#include "asio/execution/get_blocking.hpp"
+#include "asio/execution/make_with_blocking.hpp"
 #include "asio/execution/blocking_adaptation.hpp"
 #include "asio/execution/bulk_execute.hpp"
 #include "asio/execution/bulk_guarantee.hpp"

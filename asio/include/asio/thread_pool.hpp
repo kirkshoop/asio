@@ -21,6 +21,7 @@
 #include "asio/detail/thread_group.hpp"
 #include "asio/execution.hpp"
 #include "asio/execution_context.hpp"
+#include "asio/tag_invokes/any_ref.hpp"
 
 #include "asio/detail/push_options.hpp"
 
@@ -242,6 +243,15 @@ public:
         pool_, allocator_, bits_ & ~blocking_mask);
   }
 
+  friend ASIO_CONSTEXPR basic_executor_type<Allocator,
+      ASIO_UNSPECIFIED(Bits & ~blocking_mask)> 
+  tag_invoke(decltype(execution::make_with_blocking), const basic_executor_type& self, decltype(execution::possibly_blocking)) ASIO_NOEXCEPT
+  {
+    return basic_executor_type<Allocator,
+        ASIO_UNSPECIFIED(Bits & ~blocking_mask)>(
+          self.pool_, self.allocator_, self.bits_ & ~blocking_mask);
+  }
+
   /// Obtain an executor with the @c blocking.always property.
   /**
    * Do not call this function directly. It is intended for use with the
@@ -261,6 +271,15 @@ public:
           pool_, allocator_, bits_ & ~blocking_mask);
   }
 
+  friend ASIO_CONSTEXPR basic_executor_type<Allocator,
+      ASIO_UNSPECIFIED((Bits & ~blocking_mask) | blocking_always)> 
+  tag_invoke(decltype(execution::make_with_blocking), const basic_executor_type& self, decltype(execution::always_blocking)) ASIO_NOEXCEPT
+  {
+    return basic_executor_type<Allocator,
+        ASIO_UNSPECIFIED((Bits & ~blocking_mask) | blocking_always)>(
+          self.pool_, self.allocator_, self.bits_ & ~blocking_mask);
+  }
+
   /// Obtain an executor with the @c blocking.never property.
   /**
    * Do not call this function directly. It is intended for use with the
@@ -277,6 +296,14 @@ public:
   {
     return basic_executor_type<Allocator, Bits & ~blocking_mask>(
         pool_, allocator_, (bits_ & ~blocking_mask) | blocking_never);
+  }
+
+  friend ASIO_CONSTEXPR basic_executor_type<Allocator,
+      ASIO_UNSPECIFIED(Bits & ~blocking_mask)> 
+  tag_invoke(decltype(execution::make_with_blocking), const basic_executor_type& self, decltype(execution::never_blocking)) ASIO_NOEXCEPT
+  {
+    return basic_executor_type<Allocator, Bits & ~blocking_mask>(
+        self.pool_, self.allocator_, (self.bits_ & ~blocking_mask) | blocking_never);
   }
 
   /// Obtain an executor with the @c relationship.fork property.
@@ -460,6 +487,15 @@ public:
       : ((Bits & blocking_always)
           ? execution::blocking_t(execution::blocking.always)
           : execution::blocking_t(execution::blocking.possibly));
+  }
+
+  friend tag_invokes::any_ref<> tag_invoke(decltype(execution::get_blocking), const basic_executor_type& self) ASIO_NOEXCEPT
+  {
+    return (self.bits_ & blocking_never)
+      ? tag_invokes::any_ref<>(execution::never_blocking)
+      : ((Bits & blocking_always)
+          ? tag_invokes::any_ref<>(execution::always_blocking)
+          : tag_invokes::any_ref<>{execution::possibly_blocking});
   }
 
   /// Query the current value of the @c relationship property.

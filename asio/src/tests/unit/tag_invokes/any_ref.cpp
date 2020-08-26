@@ -795,11 +795,11 @@ void any_ref_query_test()
   thread_pool pool(1);
   tag_invokes::any_ref<
       typename execution::execute_o<>::type,
-    //   execution::blocking_t,
     //   execution::outstanding_work_t,
     //   execution::relationship_t,
     //   execution::mapping_t::thread_t,
       typename execution::get_allocator_o<std::allocator<void>>::type,
+      typename execution::get_blocking_o<>::type,
       typename execution::get_occupancy_o<>::type>
     ex(pool.executor());
 
@@ -834,12 +834,16 @@ void any_ref_query_test()
 
 #endif
   ASIO_CHECK(
-      asio::execution::get_occupancy(ex)
+      execution::get_occupancy(ex)
         == 1);
 
   ASIO_CHECK(
-      asio::execution::get_allocator(ex)
+      execution::get_allocator(ex)
         == std::allocator<void>{});
+
+  ASIO_CHECK(
+      execution::get_blocking(ex)
+        == execution::possibly_blocking);
 }
 
 void any_ref_set_test()
@@ -847,6 +851,13 @@ void any_ref_set_test()
   thread_pool pool(1);
   tag_invokes::any_ref<
       typename execution::execute_o<>::type,
+      typename execution::get_blocking_o<>::type,
+      typename execution::make_with_blocking_o<
+        tag_invokes::any_ref<
+          typename execution::execute_o<>::type,
+          typename execution::get_blocking_o<>::type>,
+        decltype(execution::always_blocking)
+      >::type,
       typename execution::get_allocator_o<std::allocator<void>>::type,
       typename execution::make_with_allocator_o<
         tag_invokes::any_ref<
@@ -856,8 +867,16 @@ void any_ref_set_test()
     ex(pool.executor());
 
   ASIO_CHECK(
-      asio::execution::make_with_allocator(ex, std::allocator<char>{})
-        == asio::execution::make_with_allocator(pool.executor(), std::allocator<char>{}));
+      execution::make_with_allocator(ex, std::allocator<char>{})
+        == execution::make_with_allocator(pool.executor(), std::allocator<char>{}));
+
+  ASIO_CHECK(
+      execution::make_with_blocking(ex, execution::always_blocking)
+        == execution::make_with_blocking(pool.executor(), execution::always_blocking));
+
+  ASIO_CHECK(
+      execution::get_blocking(execution::make_with_blocking(ex, execution::always_blocking))
+        == execution::always_blocking);
 }
 
 void any_ref_execute_test()
