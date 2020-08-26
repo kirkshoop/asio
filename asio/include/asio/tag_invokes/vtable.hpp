@@ -84,7 +84,7 @@ struct vtable_entry<CPO, Ret(TargetPlaceholder, ArgN...)> {
 
  protected:
 
-  static auto vtable_invoke(const cpo_t& cpo, const vtable_entry& self, void_target_t* targetPointer, ArgN... argN)
+  static Ret vtable_invoke(const cpo_t& cpo, const vtable_entry& self, void_target_t* targetPointer, ArgN... argN)
   {
     return self.fn_(cpo, targetPointer, argN...);
   }
@@ -153,7 +153,7 @@ struct vtable_entry<CPO, Ret(TargetPlaceholder, ArgN...) noexcept> {
 
  protected:
 
-  static auto vtable_invoke(const cpo_t& cpo, const vtable_entry& self, void_target_t* targetPointer, ArgN... argN) noexcept
+  static Ret vtable_invoke(const cpo_t& cpo, const vtable_entry& self, void_target_t* targetPointer, ArgN... argN) noexcept
   {
     return self.fn_(cpo, targetPointer, argN...);
   }
