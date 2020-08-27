@@ -323,6 +323,13 @@ public:
         allocator_, bits_ & ~relationship_continuation);
   }
 
+  friend ASIO_CONSTEXPR basic_executor_type 
+  tag_invoke(decltype(execution::make_with_relationship), const basic_executor_type& self, decltype(execution::fork_relationship)) ASIO_NOEXCEPT
+  {
+    return basic_executor_type(self.pool_,
+        self.allocator_, self.bits_ & ~relationship_continuation);
+  }
+
   /// Obtain an executor with the @c relationship.continuation property.
   /**
    * Do not call this function directly. It is intended for use with the
@@ -338,6 +345,13 @@ public:
   {
     return basic_executor_type(pool_,
         allocator_, bits_ | relationship_continuation);
+  }
+
+  friend ASIO_CONSTEXPR basic_executor_type 
+  tag_invoke(decltype(execution::make_with_relationship), const basic_executor_type& self, decltype(execution::continuation_relationship)) ASIO_NOEXCEPT
+  {
+    return basic_executor_type(self.pool_,
+        self.allocator_, self.bits_ | relationship_continuation);
   }
 
   /// Obtain an executor with the @c outstanding_work.tracked property.
@@ -457,7 +471,7 @@ public:
   {
     return execution::thread_mapping;
   }
-  
+
   /// Query the current value of the @c context property.
   /**
    * Do not call this function directly. It is intended for use with the
@@ -525,6 +539,13 @@ public:
     return (bits_ & relationship_continuation)
       ? execution::relationship_t(execution::relationship.continuation)
       : execution::relationship_t(execution::relationship.fork);
+  }
+
+  friend tag_invokes::any_ref<> tag_invoke(decltype(execution::get_relationship), const basic_executor_type& self) ASIO_NOEXCEPT
+  {
+    return (self.bits_ & relationship_continuation)
+      ? tag_invokes::any_ref<>(execution::continuation_relationship)
+      : tag_invokes::any_ref<>(execution::fork_relationship);
   }
 
   /// Query the current value of the @c outstanding_work property.

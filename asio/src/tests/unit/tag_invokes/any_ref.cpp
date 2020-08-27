@@ -803,6 +803,7 @@ void any_ref_query_test()
       typename execution::get_allocator_o<std::allocator<void>>::type,
       typename execution::get_blocking_o<>::type,
       typename execution::get_mapping_o<>::type,
+      typename execution::get_relationship_o<>::type,
       typename execution::get_occupancy_o<>::type>
     ex(pool.executor());
 
@@ -814,18 +815,6 @@ void any_ref_query_test()
   ASIO_CHECK(
       asio::query(ex, asio::execution::outstanding_work.untracked)
         == asio::execution::outstanding_work.untracked);
-
-  ASIO_CHECK(
-      asio::query(ex, asio::execution::relationship)
-        == asio::execution::relationship.fork);
-
-  ASIO_CHECK(
-      asio::query(ex, asio::execution::relationship.fork)
-        == asio::execution::relationship.fork);
-
-  ASIO_CHECK(
-      asio::query(ex, asio::execution::mapping)
-        == asio::execution::mapping.thread);
 
 #endif
   ASIO_CHECK(
@@ -843,6 +832,10 @@ void any_ref_query_test()
   ASIO_CHECK(
       execution::get_mapping(ex)
         == execution::thread_mapping);
+
+  ASIO_CHECK(
+      execution::get_relationship(ex)
+        == execution::fork_relationship);
 
 #if defined(ASIO_HAS_VARIABLE_TEMPLATES)
 
@@ -864,6 +857,12 @@ void any_ref_set_test()
           typename execution::get_blocking_o<>::type>,
         decltype(execution::always_blocking)
       >::type,
+      typename execution::make_with_relationship_o<
+        tag_invokes::any_ref<
+          typename execution::execute_o<>::type,
+          typename execution::get_relationship_o<>::type>,
+        decltype(execution::continuation_relationship)
+      >::type,
       typename execution::get_allocator_o<std::allocator<void>>::type,
       typename execution::make_with_allocator_o<
         tag_invokes::any_ref<
@@ -883,6 +882,15 @@ void any_ref_set_test()
   ASIO_CHECK(
       execution::get_blocking(execution::make_with_blocking(ex, execution::always_blocking))
         == execution::always_blocking);
+
+  ASIO_CHECK(
+      execution::make_with_relationship(ex, execution::continuation_relationship)
+        == execution::make_with_relationship(pool.executor(), execution::continuation_relationship));
+
+  ASIO_CHECK(
+      execution::get_relationship(execution::make_with_relationship(ex, execution::continuation_relationship))
+        == execution::continuation_relationship);
+
 }
 
 void any_ref_execute_test()

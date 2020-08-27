@@ -44,6 +44,8 @@
 #include "asio/execution/receiver.hpp"
 #include "asio/execution/receiver_invocation_error.hpp"
 #include "asio/execution/relationship.hpp"
+#include "asio/execution/get_relationship.hpp"
+#include "asio/execution/make_with_relationship.hpp"
 #include "asio/execution/schedule.hpp"
 #include "asio/execution/scheduler.hpp"
 #include "asio/execution/sender.hpp"
