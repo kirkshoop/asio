@@ -795,8 +795,6 @@ void any_ref_query_test()
   thread_pool pool(1);
   tag_invokes::any_ref<
       typename execution::execute_o<>::type,
-    //   execution::outstanding_work_t,
-    //   execution::relationship_t,
 #if defined(ASIO_HAS_VARIABLE_TEMPLATES)
       typename execution::get_context_as_o<thread_pool&>::type,
 #endif // defined(ASIO_HAS_VARIABLE_TEMPLATES)
@@ -804,19 +802,10 @@ void any_ref_query_test()
       typename execution::get_blocking_o<>::type,
       typename execution::get_mapping_o<>::type,
       typename execution::get_relationship_o<>::type,
+      typename execution::get_outstanding_work_o<>::type,
       typename execution::get_occupancy_o<>::type>
     ex(pool.executor());
 
-#if 0
-  ASIO_CHECK(
-      asio::query(ex, asio::execution::outstanding_work)
-        == asio::execution::outstanding_work.untracked);
-
-  ASIO_CHECK(
-      asio::query(ex, asio::execution::outstanding_work.untracked)
-        == asio::execution::outstanding_work.untracked);
-
-#endif
   ASIO_CHECK(
       execution::get_occupancy(ex)
         == 1);
@@ -836,6 +825,10 @@ void any_ref_query_test()
   ASIO_CHECK(
       execution::get_relationship(ex)
         == execution::fork_relationship);
+
+  ASIO_CHECK(
+      execution::get_outstanding_work(ex)
+        == execution::untracked_outstanding_work);
 
 #if defined(ASIO_HAS_VARIABLE_TEMPLATES)
 
@@ -857,11 +850,19 @@ void any_ref_set_test()
           typename execution::get_blocking_o<>::type>,
         decltype(execution::always_blocking)
       >::type,
+      typename execution::get_relationship_o<>::type,
       typename execution::make_with_relationship_o<
         tag_invokes::any_ref<
           typename execution::execute_o<>::type,
           typename execution::get_relationship_o<>::type>,
         decltype(execution::continuation_relationship)
+      >::type,
+      typename execution::get_outstanding_work_o<>::type,
+      typename execution::make_with_outstanding_work_o<
+        tag_invokes::any_ref<
+          typename execution::execute_o<>::type,
+          typename execution::get_outstanding_work_o<>::type>,
+        decltype(execution::tracked_outstanding_work)
       >::type,
       typename execution::get_allocator_o<std::allocator<void>>::type,
       typename execution::make_with_allocator_o<
@@ -890,6 +891,14 @@ void any_ref_set_test()
   ASIO_CHECK(
       execution::get_relationship(execution::make_with_relationship(ex, execution::continuation_relationship))
         == execution::continuation_relationship);
+
+  ASIO_CHECK(
+      execution::make_with_outstanding_work(ex, execution::tracked_outstanding_work)
+        == execution::make_with_outstanding_work(pool.executor(), execution::tracked_outstanding_work));
+
+  ASIO_CHECK(
+      execution::get_outstanding_work(execution::make_with_outstanding_work(ex, execution::tracked_outstanding_work))
+        == execution::tracked_outstanding_work);
 
 }
 

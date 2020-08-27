@@ -372,6 +372,14 @@ public:
         pool_, allocator_, bits_);
   }
 
+  friend ASIO_CONSTEXPR basic_executor_type<Allocator,
+      ASIO_UNSPECIFIED(Bits | outstanding_work_tracked)> 
+  tag_invoke(decltype(execution::make_with_outstanding_work), const basic_executor_type& self, decltype(execution::tracked_outstanding_work)) ASIO_NOEXCEPT
+  {
+    return basic_executor_type<Allocator, Bits | outstanding_work_tracked>(
+        self.pool_, self.allocator_, self.bits_);
+  }
+
   /// Obtain an executor with the @c outstanding_work.untracked property.
   /**
    * Do not call this function directly. It is intended for use with the
@@ -388,6 +396,14 @@ public:
   {
     return basic_executor_type<Allocator, Bits & ~outstanding_work_tracked>(
         pool_, allocator_, bits_);
+  }
+
+  friend ASIO_CONSTEXPR basic_executor_type<Allocator,
+      ASIO_UNSPECIFIED(Bits & ~outstanding_work_tracked)> 
+  tag_invoke(decltype(execution::make_with_outstanding_work), const basic_executor_type& self, decltype(execution::untracked_outstanding_work)) ASIO_NOEXCEPT
+  {
+    return basic_executor_type<Allocator, Bits & ~outstanding_work_tracked>(
+        self.pool_, self.allocator_, self.bits_);
   }
 
   /// Obtain an executor with the specified @c allocator property.
@@ -565,6 +581,13 @@ public:
     return (Bits & outstanding_work_tracked)
       ? execution::outstanding_work_t(execution::outstanding_work.tracked)
       : execution::outstanding_work_t(execution::outstanding_work.untracked);
+  }
+
+  friend tag_invokes::any_ref<> tag_invoke(decltype(execution::get_outstanding_work), const basic_executor_type&) ASIO_NOEXCEPT
+  {
+    return (Bits & outstanding_work_tracked)
+      ? tag_invokes::any_ref<>(execution::tracked_outstanding_work)
+      : tag_invokes::any_ref<>(execution::untracked_outstanding_work);
   }
 
   /// Query the current value of the @c allocator property.

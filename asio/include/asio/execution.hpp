@@ -40,6 +40,8 @@
 #include "asio/execution/get_occupancy.hpp"
 #include "asio/execution/operation_state.hpp"
 #include "asio/execution/outstanding_work.hpp"
+#include "asio/execution/get_outstanding_work.hpp"
+#include "asio/execution/make_with_outstanding_work.hpp"
 #include "asio/execution/prefer_only.hpp"
 #include "asio/execution/receiver.hpp"
 #include "asio/execution/receiver_invocation_error.hpp"
