@@ -814,9 +814,17 @@ void any_ref_query_test()
       execution::get_allocator(ex)
         == std::allocator<void>{});
 
+  static_assert(tag_invokes::static_tag_invoke_v<decltype(execution::get_blocking), decltype(execution::make_with_blocking(pool.executor(), execution::always_blocking))>
+        == execution::always_blocking);
+
+  static_assert(!tag_invokes::can_static_tag_invoke_v<decltype(execution::get_blocking), decltype(pool.executor())>);
+
   ASIO_CHECK(
       execution::get_blocking(ex)
         == execution::possibly_blocking);
+
+  static_assert(tag_invokes::static_tag_invoke_v<decltype(execution::get_mapping), decltype(pool.executor())>
+        == execution::thread_mapping);
 
   ASIO_CHECK(
       execution::get_mapping(ex)
@@ -825,6 +833,9 @@ void any_ref_query_test()
   ASIO_CHECK(
       execution::get_relationship(ex)
         == execution::fork_relationship);
+
+  static_assert(tag_invokes::static_tag_invoke_v<decltype(execution::get_outstanding_work), decltype(pool.executor())>
+        == execution::untracked_outstanding_work);
 
   ASIO_CHECK(
       execution::get_outstanding_work(ex)

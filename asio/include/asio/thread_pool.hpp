@@ -483,7 +483,9 @@ public:
     return execution::mapping.thread;
   }
 
-  friend decltype(execution::thread_mapping) tag_invoke(decltype(execution::get_mapping), const basic_executor_type& self) ASIO_NOEXCEPT
+  friend ASIO_CONSTEXPR 
+  decltype(execution::thread_mapping) 
+  tag_invoke(decltype(execution::get_mapping), tag_invokes::any_instance_of<basic_executor_type>) ASIO_NOEXCEPT
   {
     return execution::thread_mapping;
   }
@@ -529,13 +531,27 @@ public:
           : execution::blocking_t(execution::blocking.possibly));
   }
 
-  friend tag_invokes::any_ref<> tag_invoke(decltype(execution::get_blocking), const basic_executor_type& self) ASIO_NOEXCEPT
+  struct static_get_blocking_disabled {};
+  friend ASIO_CONSTEXPR 
+  decltype(execution::always_blocking)
+  tag_invoke(decltype(execution::get_blocking), 
+    typename conditional<!!(Bits & blocking_always), 
+      tag_invokes::any_instance_of<basic_executor_type>, 
+      static_get_blocking_disabled>::type) ASIO_NOEXCEPT
+  {
+    return execution::always_blocking;
+  }
+  struct get_blocking_disabled {int bits_;};
+  friend 
+  tag_invokes::any_ref<> 
+  tag_invoke(decltype(execution::get_blocking), 
+    typename conditional<!(Bits & blocking_always), 
+      const basic_executor_type&, 
+      get_blocking_disabled>::type self) ASIO_NOEXCEPT
   {
     return (self.bits_ & blocking_never)
       ? tag_invokes::any_ref<>(execution::never_blocking)
-      : ((Bits & blocking_always)
-          ? tag_invokes::any_ref<>(execution::always_blocking)
-          : tag_invokes::any_ref<>{execution::possibly_blocking});
+      : tag_invokes::any_ref<>(execution::possibly_blocking);
   }
 
   /// Query the current value of the @c relationship property.
@@ -583,11 +599,15 @@ public:
       : execution::outstanding_work_t(execution::outstanding_work.untracked);
   }
 
-  friend tag_invokes::any_ref<> tag_invoke(decltype(execution::get_outstanding_work), const basic_executor_type&) ASIO_NOEXCEPT
+  friend ASIO_CONSTEXPR 
+  typename conditional<!!(Bits & outstanding_work_tracked), 
+    typename decay<decltype(execution::tracked_outstanding_work)>::type, 
+    typename decay<decltype(execution::untracked_outstanding_work)>::type>::type 
+  tag_invoke(decltype(execution::get_outstanding_work), tag_invokes::any_instance_of<basic_executor_type>) ASIO_NOEXCEPT
   {
-    return (Bits & outstanding_work_tracked)
-      ? tag_invokes::any_ref<>(execution::tracked_outstanding_work)
-      : tag_invokes::any_ref<>(execution::untracked_outstanding_work);
+    return typename conditional<!!(Bits & outstanding_work_tracked), 
+    typename decay<decltype(execution::tracked_outstanding_work)>::type, 
+    typename decay<decltype(execution::untracked_outstanding_work)>::type>::type();
   }
 
   /// Query the current value of the @c allocator property.

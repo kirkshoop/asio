@@ -81,6 +81,35 @@ struct tag_invoke_result
 template <typename CPO, typename T, typename... Vs>
 using tag_invoke_t = typename tag_invoke_result<CPO, T, Vs...>::type;
 
+/// The result of a @c tag_invoke expression at compile-time.
+inline constexpr unspecified static_tag_invoke_v = unspecified;
+
+/// A type trait that determines whether a @c tag_invoke expression is
+/// well-formed at compile-time.
+/**
+ * Class template @c can_tag_invoke is a trait that is derived from
+ * @c true_type if the expression <tt>tag_invokes::tag_invoke(std::declval<CPO>(),
+ * std::declval<T>(), std::declval<Vs>()...)</tt> is well formed; otherwise  
+ * @c false_type.
+ */
+template <typename CPO, typename T, typename... Vs>
+struct can_static_tag_invoke :
+  integral_constant<bool, automatically_determined>
+{
+};
+
+/// A type trait to determine the result of a @c tag_invoke expression at compile-time.
+template <typename CPO, typename T, typename... Vs>
+struct static_tag_invoke_result
+{
+  /// The type of the tag_invoke expression.
+  typedef automatically_determined type;
+};
+
+/// A type alias to determine the result of a @c tag_invoke expression at compile-time.
+template <typename CPO, typename T, typename... Vs>
+using static_tag_invoke_result_t = typename static_tag_invoke_result<CPO, T, Vs...>::type;
+
 } // namespace tag_invokes
 } // namespace asio
 
@@ -392,6 +421,28 @@ ASIO_VARIADIC_GENERATE(ASIO_PRIVATE_TAG_INVOKE_CALL_DEF)
 #endif // defined(ASIO_HAS_MOVE)
 };
 
+template<typename T>
+struct any_instance_of {
+    ASIO_CONSTEXPR any_instance_of() noexcept = default;
+
+    // Instance of 'type' is implicitly constructible from any instance of this type.
+    /*implicit*/ ASIO_CONSTEXPR any_instance_of(const typename asio::remove_cvref<T>::type&) noexcept {}
+};
+
+// from Richard Smith's comment: https://stackoverflow.com/a/50169108
+template<int (*p)()> std::true_type is_constexpr_impl(decltype(int{(p(), 0U)}));
+template<int (*p)()> std::false_type is_constexpr_impl(...);
+
+// #if defined(ASIO_HAS_ALIAS_TEMPLATES)
+
+// template<int (*p)()> using is_constexpr = decltype(is_constexpr_impl<p>(0));
+
+// #else // defined(ASIO_HAS_ALIAS_TEMPLATES)
+
+template<int (*p)()> struct is_constexpr : decltype(is_constexpr_impl<p>(0)) {};
+
+// #endif // defined(ASIO_HAS_ALIAS_TEMPLATES)
+
 template <typename T = impl>
 struct static_instance
 {
@@ -408,6 +459,8 @@ namespace {
 
 static ASIO_CONSTEXPR const asio_tag_invokes_tag_invoke_fn::impl&
   tag_invoke = asio_tag_invokes_tag_invoke_fn::static_instance<>::instance;
+
+using asio_tag_invokes_tag_invoke_fn::any_instance_of;
 
 } // namespace
 
@@ -525,6 +578,53 @@ ASIO_VARIADIC_GENERATE(ASIO_PRIVATE_TAG_INVOKE_TRAITS_DEF)
 #undef ASIO_PRIVATE_TAG_INVOKE_TRAITS_DEF
 
 #endif // defined(ASIO_HAS_VARIADIC_TEMPLATES)
+
+#if defined(ASIO_HAS_VARIABLE_TEMPLATES)
+
+template<typename T>
+inline ASIO_CONSTEXPR any_instance_of<T> any_instance_of_v{};
+
+#endif // defined(ASIO_HAS_VARIABLE_TEMPLATES)
+
+template <typename CPO, typename T, typename... Vs>
+struct can_static_tag_invoke {
+  template <typename AnyT, typename... AnyVs>
+  static ASIO_CONSTEXPR auto check_impl(int) -> decltype(CPO{}(AnyT{}, AnyVs{}...), 0) { 
+    return CPO{}(any_instance_of_v<T>, any_instance_of_v<Vs>...), 0;
+  }
+  template <typename AnyT, typename... AnyVs>
+  static int check_impl(...) {
+    return 0;
+  }
+  static ASIO_CONSTEXPR int check() { 
+    return can_static_tag_invoke::check_impl<any_instance_of<T>, any_instance_of<Vs>...>(0U); 
+  }
+  ASIO_STATIC_CONSTEXPR(bool, value = asio_tag_invokes_tag_invoke_fn::is_constexpr<can_static_tag_invoke::check>::value);
+};
+
+#if defined(ASIO_HAS_VARIABLE_TEMPLATES)
+
+template <typename CPO, typename T, typename... Vs>
+ASIO_CONSTEXPR bool can_static_tag_invoke_v = can_static_tag_invoke<CPO, T, Vs...>::value;
+
+#endif // defined(ASIO_HAS_VARIABLE_TEMPLATES)
+
+template <typename CPO, typename T, typename... Vs>
+struct static_tag_invoke_result : tag_invoke_result<CPO, any_instance_of<T>, any_instance_of<Vs>...> {};
+
+#if defined(ASIO_HAS_ALIAS_TEMPLATES)
+
+template <typename CPO, typename T, typename... Vs>
+using static_tag_invoke_result_t = typename static_tag_invoke_result<CPO, T, Vs...>::type;
+
+#endif // defined(ASIO_HAS_ALIAS_TEMPLATES)
+
+#if defined(ASIO_HAS_VARIABLE_TEMPLATES)
+
+template<typename CPO, typename T, typename... Args>
+inline ASIO_CONSTEXPR typename enable_if<can_static_tag_invoke_v<CPO, T, Args...>, static_tag_invoke_result<CPO, T, Args...>>::type::type static_tag_invoke_v = CPO{}(any_instance_of_v<T>, any_instance_of_v<Args>...);
+
+#endif // defined(ASIO_HAS_VARIABLE_TEMPLATES)
 
 } // namespace tag_invokes
 } // namespace asio
