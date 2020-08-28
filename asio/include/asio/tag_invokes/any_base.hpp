@@ -63,22 +63,6 @@ struct _any_base<
       static auto  get_vtable(T&& t) {
         return static_cast<T&&>(t).get_vtable();
       }
-   public:
-    template <typename DerivedT>
-    friend auto tag_invoke(
-        base_cpo_t<CPO> cpo,
-        DerivedT&& derived,
-        Args... args) noexcept(NoExcept) 
-        -> std::enable_if_t<
-          std::true_type::value,//std::is_base_of_v<std::decay_t<DerivedT>, Derived>, 
-          Ret> {
-    //   void* objPtr = get_object_address(derived);
-    //   auto* fnPtr = get_vtable(derived)->template get<CPO>();
-    //   return fnPtr(
-    //       std::move(cpo),
-    //       objPtr,
-    //       (Args&&) args...);
-    }
   };
 };
 
