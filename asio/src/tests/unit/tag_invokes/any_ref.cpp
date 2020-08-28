@@ -53,6 +53,11 @@ struct fat_executor
       return 1;
   }
 
+  decltype(execution::always_blocking) tag_invoke(decltype(execution::get_blocking)) const
+  {
+      return execution::always_blocking;
+  }
+
   friend bool operator==(const fat_executor& a,
       const fat_executor& b) ASIO_NOEXCEPT
   {
@@ -111,17 +116,14 @@ struct test_receiver {
 void any_ref_construction_test()
 {
   typedef tag_invokes::any_ref<> ex_no_props_t;
-#if 1
-  thread_pool pool(1);
-  asio::nullptr_t null_ptr = asio::nullptr_t();
-#else
+
   typedef tag_invokes::any_ref<
-      execution::blocking_t
+      typename execution::get_blocking_o<>::type
     > ex_one_prop_t;
 
   typedef tag_invokes::any_ref<
-      execution::blocking_t,
-      execution::occupancy_t
+      typename execution::get_blocking_o<>::type,
+      typename execution::get_occupancy_o<>::type
     > ex_two_props_t;
 
   thread_pool pool(1);
@@ -129,49 +131,49 @@ void any_ref_construction_test()
 
   ex_two_props_t ex_two_props_1;
 
-  ASIO_CHECK(ex_two_props_1.target<void>() == 0);
+  ASIO_CHECK(!ex_two_props_1);
   ASIO_CHECK(ex_two_props_1 == null_ptr);
 
   ex_two_props_t ex_two_props_2(null_ptr);
 
-  ASIO_CHECK(ex_two_props_2.target<void>() == 0);
+  ASIO_CHECK(!ex_two_props_2);
   ASIO_CHECK(ex_two_props_2 == null_ptr);
   ASIO_CHECK(ex_two_props_2 == ex_two_props_1);
 
   ex_two_props_t ex_two_props_3(pool.executor());
 
-  ASIO_CHECK(ex_two_props_3.target<void>() != 0);
+  ASIO_CHECK(!!ex_two_props_3);
   ASIO_CHECK(ex_two_props_3 != null_ptr);
   ASIO_CHECK(ex_two_props_3 != ex_two_props_1);
 
   ex_two_props_t ex_two_props_4(ex_two_props_1);
 
-  ASIO_CHECK(ex_two_props_4.target<void>() == 0);
+  ASIO_CHECK(!ex_two_props_4);
   ASIO_CHECK(ex_two_props_4 == null_ptr);
   ASIO_CHECK(ex_two_props_4 == ex_two_props_1);
 
   ex_two_props_t ex_two_props_5(ex_two_props_3);
 
-  ASIO_CHECK(ex_two_props_5.target<void>() != 0);
+  ASIO_CHECK(!!ex_two_props_5);
   ASIO_CHECK(ex_two_props_5 != null_ptr);
   ASIO_CHECK(ex_two_props_5 == ex_two_props_3);
 
   ex_two_props_t ex_two_props_6 = fat_executor(1);
 
-  ASIO_CHECK(ex_two_props_6.target<void>() != 0);
+  ASIO_CHECK(!!ex_two_props_6);
   ASIO_CHECK(ex_two_props_6 != null_ptr);
   ASIO_CHECK(ex_two_props_6 != ex_two_props_1);
 
   ex_two_props_t ex_two_props_7 = fat_executor(1);
 
-  ASIO_CHECK(ex_two_props_7.target<void>() != 0);
+  ASIO_CHECK(!!ex_two_props_7);
   ASIO_CHECK(ex_two_props_7 != null_ptr);
   ASIO_CHECK(ex_two_props_7 != ex_two_props_1);
   ASIO_CHECK(ex_two_props_7 == ex_two_props_6);
 
   ex_two_props_t ex_two_props_8 = fat_executor(2);
 
-  ASIO_CHECK(ex_two_props_8.target<void>() != 0);
+  ASIO_CHECK(!!ex_two_props_8);
   ASIO_CHECK(ex_two_props_8 != null_ptr);
   ASIO_CHECK(ex_two_props_8 != ex_two_props_1);
   ASIO_CHECK(ex_two_props_8 != ex_two_props_6);
@@ -179,7 +181,7 @@ void any_ref_construction_test()
 
   ex_two_props_t ex_two_props_9(ex_two_props_6);
 
-  ASIO_CHECK(ex_two_props_9.target<void>() != 0);
+  ASIO_CHECK(!!ex_two_props_9);
   ASIO_CHECK(ex_two_props_9 != null_ptr);
   ASIO_CHECK(ex_two_props_9 != ex_two_props_1);
   ASIO_CHECK(ex_two_props_9 == ex_two_props_6);
@@ -189,24 +191,24 @@ void any_ref_construction_test()
 #if defined(ASIO_HAS_MOVE)
   ex_two_props_t ex_two_props_10(std::move(ex_two_props_1));
 
-  ASIO_CHECK(ex_two_props_10.target<void>() == 0);
+  ASIO_CHECK(!ex_two_props_10);
   ASIO_CHECK(ex_two_props_10 == null_ptr);
-  ASIO_CHECK(ex_two_props_1.target<void>() == 0);
+  ASIO_CHECK(!ex_two_props_1);
   ASIO_CHECK(ex_two_props_1 == null_ptr);
 
   ex_two_props_t ex_two_props_11(std::move(ex_two_props_3));
 
-  ASIO_CHECK(ex_two_props_11.target<void>() != 0);
+  ASIO_CHECK(!!ex_two_props_11);
   ASIO_CHECK(ex_two_props_11 != null_ptr);
-  ASIO_CHECK(ex_two_props_3.target<void>() == 0);
+  ASIO_CHECK(!ex_two_props_3);
   ASIO_CHECK(ex_two_props_3 == null_ptr);
   ASIO_CHECK(ex_two_props_11 == ex_two_props_5);
 
   ex_two_props_t ex_two_props_12(std::move(ex_two_props_7));
 
-  ASIO_CHECK(ex_two_props_12.target<void>() != 0);
+  ASIO_CHECK(!!ex_two_props_12);
   ASIO_CHECK(ex_two_props_12 != null_ptr);
-  ASIO_CHECK(ex_two_props_7.target<void>() == 0);
+  ASIO_CHECK(!ex_two_props_7);
   ASIO_CHECK(ex_two_props_7 == null_ptr);
   ASIO_CHECK(ex_two_props_12 == ex_two_props_6);
   ASIO_CHECK(ex_two_props_12 != ex_two_props_8);
@@ -214,49 +216,49 @@ void any_ref_construction_test()
 
   ex_one_prop_t ex_one_prop_1;
 
-  ASIO_CHECK(ex_one_prop_1.target<void>() == 0);
+  ASIO_CHECK(!ex_one_prop_1);
   ASIO_CHECK(ex_one_prop_1 == null_ptr);
 
   ex_one_prop_t ex_one_prop_2(null_ptr);
 
-  ASIO_CHECK(ex_one_prop_2.target<void>() == 0);
+  ASIO_CHECK(!ex_one_prop_2);
   ASIO_CHECK(ex_one_prop_2 == null_ptr);
   ASIO_CHECK(ex_one_prop_2 == ex_one_prop_1);
 
   ex_one_prop_t ex_one_prop_3(pool.executor());
 
-  ASIO_CHECK(ex_one_prop_3.target<void>() != 0);
+  ASIO_CHECK(!!ex_one_prop_3);
   ASIO_CHECK(ex_one_prop_3 != null_ptr);
   ASIO_CHECK(ex_one_prop_3 != ex_one_prop_1);
 
   ex_one_prop_t ex_one_prop_4(ex_one_prop_1);
 
-  ASIO_CHECK(ex_one_prop_4.target<void>() == 0);
+  ASIO_CHECK(!ex_one_prop_4);
   ASIO_CHECK(ex_one_prop_4 == null_ptr);
   ASIO_CHECK(ex_one_prop_4 == ex_one_prop_1);
 
   ex_one_prop_t ex_one_prop_5(ex_one_prop_3);
 
-  ASIO_CHECK(ex_one_prop_5.target<void>() != 0);
+  ASIO_CHECK(!!ex_one_prop_5);
   ASIO_CHECK(ex_one_prop_5 != null_ptr);
   ASIO_CHECK(ex_one_prop_5 == ex_one_prop_3);
 
   ex_one_prop_t ex_one_prop_6 = fat_executor(1);
 
-  ASIO_CHECK(ex_one_prop_6.target<void>() != 0);
+  ASIO_CHECK(!!ex_one_prop_6);
   ASIO_CHECK(ex_one_prop_6 != null_ptr);
   ASIO_CHECK(ex_one_prop_6 != ex_one_prop_1);
 
   ex_one_prop_t ex_one_prop_7 = fat_executor(1);
 
-  ASIO_CHECK(ex_one_prop_7.target<void>() != 0);
+  ASIO_CHECK(!!ex_one_prop_7);
   ASIO_CHECK(ex_one_prop_7 != null_ptr);
   ASIO_CHECK(ex_one_prop_7 != ex_one_prop_1);
   ASIO_CHECK(ex_one_prop_7 == ex_one_prop_6);
 
   ex_one_prop_t ex_one_prop_8 = fat_executor(2);
 
-  ASIO_CHECK(ex_one_prop_8.target<void>() != 0);
+  ASIO_CHECK(!!ex_one_prop_8);
   ASIO_CHECK(ex_one_prop_8 != null_ptr);
   ASIO_CHECK(ex_one_prop_8 != ex_one_prop_1);
   ASIO_CHECK(ex_one_prop_8 != ex_one_prop_6);
@@ -264,7 +266,7 @@ void any_ref_construction_test()
 
   ex_one_prop_t ex_one_prop_9(ex_one_prop_6);
 
-  ASIO_CHECK(ex_one_prop_9.target<void>() != 0);
+  ASIO_CHECK(!!ex_one_prop_9);
   ASIO_CHECK(ex_one_prop_9 != null_ptr);
   ASIO_CHECK(ex_one_prop_9 != ex_one_prop_1);
   ASIO_CHECK(ex_one_prop_9 == ex_one_prop_6);
@@ -274,24 +276,24 @@ void any_ref_construction_test()
 #if defined(ASIO_HAS_MOVE)
   ex_one_prop_t ex_one_prop_10(std::move(ex_one_prop_1));
 
-  ASIO_CHECK(ex_one_prop_10.target<void>() == 0);
+  ASIO_CHECK(!ex_one_prop_10);
   ASIO_CHECK(ex_one_prop_10 == null_ptr);
-  ASIO_CHECK(ex_one_prop_1.target<void>() == 0);
+  ASIO_CHECK(!ex_one_prop_1);
   ASIO_CHECK(ex_one_prop_1 == null_ptr);
 
   ex_one_prop_t ex_one_prop_11(std::move(ex_one_prop_3));
 
-  ASIO_CHECK(ex_one_prop_11.target<void>() != 0);
+  ASIO_CHECK(!!ex_one_prop_11);
   ASIO_CHECK(ex_one_prop_11 != null_ptr);
-  ASIO_CHECK(ex_one_prop_3.target<void>() == 0);
+  ASIO_CHECK(!ex_one_prop_3);
   ASIO_CHECK(ex_one_prop_3 == null_ptr);
   ASIO_CHECK(ex_one_prop_11 == ex_one_prop_5);
 
   ex_one_prop_t ex_one_prop_12(std::move(ex_one_prop_7));
 
-  ASIO_CHECK(ex_one_prop_12.target<void>() != 0);
+  ASIO_CHECK(!!ex_one_prop_12);
   ASIO_CHECK(ex_one_prop_12 != null_ptr);
-  ASIO_CHECK(ex_one_prop_7.target<void>() == 0);
+  ASIO_CHECK(!ex_one_prop_7);
   ASIO_CHECK(ex_one_prop_7 == null_ptr);
   ASIO_CHECK(ex_one_prop_12 == ex_one_prop_6);
   ASIO_CHECK(ex_one_prop_12 != ex_one_prop_8);
@@ -299,64 +301,64 @@ void any_ref_construction_test()
 
   ex_one_prop_t ex_one_prop_13(ex_two_props_1);
 
-  ASIO_CHECK(ex_one_prop_13.target<void>() == 0);
+  ASIO_CHECK(!ex_one_prop_13);
   ASIO_CHECK(ex_one_prop_13 == null_ptr);
 
   ex_one_prop_t ex_one_prop_14(ex_two_props_5);
 
-  ASIO_CHECK(ex_one_prop_14.target<void>() != 0);
+  ASIO_CHECK(!!ex_one_prop_14);
   ASIO_CHECK(ex_one_prop_14 != null_ptr);
 
   ex_one_prop_t ex_one_prop_15(ex_two_props_9);
 
-  ASIO_CHECK(ex_one_prop_15.target<void>() != 0);
+  ASIO_CHECK(!!ex_one_prop_15);
   ASIO_CHECK(ex_one_prop_15 != null_ptr);
-#endif
+
   ex_no_props_t ex_no_props_1;
 
-//   ASIO_CHECK(ex_no_props_1.target<void>() == 0);
+   ASIO_CHECK(!ex_no_props_1);
   ASIO_CHECK(ex_no_props_1 == null_ptr);
 
   ex_no_props_t ex_no_props_2(null_ptr);
 
-//   ASIO_CHECK(ex_no_props_2.target<void>() == 0);
+   ASIO_CHECK(!ex_no_props_2);
   ASIO_CHECK(ex_no_props_2 == null_ptr);
   ASIO_CHECK(ex_no_props_2 == ex_no_props_1);
 
   ex_no_props_t ex_no_props_3(pool.executor());
 
-//   ASIO_CHECK(ex_no_props_3.target<void>() != 0);
+   ASIO_CHECK(!!ex_no_props_3);
   ASIO_CHECK(ex_no_props_3 != null_ptr);
   ASIO_CHECK(ex_no_props_3 != ex_no_props_1);
 
   ex_no_props_t ex_no_props_4(ex_no_props_1);
 
-//   ASIO_CHECK(ex_no_props_4.target<void>() == 0);
+   ASIO_CHECK(!ex_no_props_4);
   ASIO_CHECK(ex_no_props_4 == null_ptr);
   ASIO_CHECK(ex_no_props_4 == ex_no_props_1);
 
   ex_no_props_t ex_no_props_5(ex_no_props_3);
 
-//   ASIO_CHECK(ex_no_props_5.target<void>() != 0);
+   ASIO_CHECK(!!ex_no_props_5);
   ASIO_CHECK(ex_no_props_5 != null_ptr);
   ASIO_CHECK(ex_no_props_5 == ex_no_props_3);
 
   ex_no_props_t ex_no_props_6 = fat_executor(1);
 
-//   ASIO_CHECK(ex_no_props_6.target<void>() != 0);
+   ASIO_CHECK(!!ex_no_props_6);
   ASIO_CHECK(ex_no_props_6 != null_ptr);
   ASIO_CHECK(ex_no_props_6 != ex_no_props_1);
 
   ex_no_props_t ex_no_props_7 = fat_executor(1);
 
-//   ASIO_CHECK(ex_no_props_7.target<void>() != 0);
+   ASIO_CHECK(!!ex_no_props_7);
   ASIO_CHECK(ex_no_props_7 != null_ptr);
   ASIO_CHECK(ex_no_props_7 != ex_no_props_1);
   ASIO_CHECK(ex_no_props_7 == ex_no_props_6);
 
   ex_no_props_t ex_no_props_8 = fat_executor(2);
 
-//   ASIO_CHECK(ex_no_props_8.target<void>() != 0);
+   ASIO_CHECK(!!ex_no_props_8);
   ASIO_CHECK(ex_no_props_8 != null_ptr);
   ASIO_CHECK(ex_no_props_8 != ex_no_props_1);
   ASIO_CHECK(ex_no_props_8 != ex_no_props_6);
@@ -364,7 +366,7 @@ void any_ref_construction_test()
 
   ex_no_props_t ex_no_props_9(ex_no_props_6);
 
-//   ASIO_CHECK(ex_no_props_9.target<void>() != 0);
+   ASIO_CHECK(!!ex_no_props_9);
   ASIO_CHECK(ex_no_props_9 != null_ptr);
   ASIO_CHECK(ex_no_props_9 != ex_no_props_1);
   ASIO_CHECK(ex_no_props_9 == ex_no_props_6);
@@ -374,76 +376,71 @@ void any_ref_construction_test()
 #if defined(ASIO_HAS_MOVE)
   ex_no_props_t ex_no_props_10(std::move(ex_no_props_1));
 
-//   ASIO_CHECK(ex_no_props_10.target<void>() == 0);
+   ASIO_CHECK(!ex_no_props_10);
   ASIO_CHECK(ex_no_props_10 == null_ptr);
-//   ASIO_CHECK(ex_no_props_1.target<void>() == 0);
+   ASIO_CHECK(!ex_no_props_1);
   ASIO_CHECK(ex_no_props_1 == null_ptr);
 
   ex_no_props_t ex_no_props_11(std::move(ex_no_props_3));
 
-//   ASIO_CHECK(ex_no_props_11.target<void>() != 0);
+   ASIO_CHECK(!!ex_no_props_11);
   ASIO_CHECK(ex_no_props_11 != null_ptr);
-//   ASIO_CHECK(ex_no_props_3.target<void>() == 0);
+   ASIO_CHECK(!ex_no_props_3);
   ASIO_CHECK(ex_no_props_3 == null_ptr);
   ASIO_CHECK(ex_no_props_11 == ex_no_props_5);
 
   ex_no_props_t ex_no_props_12(std::move(ex_no_props_7));
 
-//   ASIO_CHECK(ex_no_props_12.target<void>() != 0);
+   ASIO_CHECK(!!ex_no_props_12);
   ASIO_CHECK(ex_no_props_12 != null_ptr);
-//   ASIO_CHECK(ex_no_props_7.target<void>() == 0);
+   ASIO_CHECK(!ex_no_props_7);
   ASIO_CHECK(ex_no_props_7 == null_ptr);
   ASIO_CHECK(ex_no_props_12 == ex_no_props_6);
   ASIO_CHECK(ex_no_props_12 != ex_no_props_8);
 #endif // defined(ASIO_HAS_MOVE)
 
-#if 0
   ex_no_props_t ex_no_props_13(ex_two_props_1);
 
-//   ASIO_CHECK(ex_no_props_13.target<void>() == 0);
+   ASIO_CHECK(!ex_no_props_13);
   ASIO_CHECK(ex_no_props_13 == null_ptr);
 
   ex_no_props_t ex_no_props_14(ex_two_props_5);
 
-//   ASIO_CHECK(ex_no_props_14.target<void>() != 0);
+   ASIO_CHECK(!!ex_no_props_14);
   ASIO_CHECK(ex_no_props_14 != null_ptr);
 
   ex_no_props_t ex_no_props_15(ex_two_props_9);
 
-//   ASIO_CHECK(ex_no_props_15.target<void>() != 0);
+   ASIO_CHECK(!!ex_no_props_15);
   ASIO_CHECK(ex_no_props_15 != null_ptr);
 
   ex_no_props_t ex_no_props_16(ex_one_prop_1);
 
-//   ASIO_CHECK(ex_no_props_16.target<void>() == 0);
+   ASIO_CHECK(!ex_no_props_16);
   ASIO_CHECK(ex_no_props_16 == null_ptr);
 
   ex_no_props_t ex_no_props_17(ex_one_prop_5);
 
-//   ASIO_CHECK(ex_no_props_17.target<void>() != 0);
+   ASIO_CHECK(!!ex_no_props_17);
   ASIO_CHECK(ex_no_props_17 != null_ptr);
 
   ex_no_props_t ex_no_props_18(ex_one_prop_9);
 
-//   ASIO_CHECK(ex_no_props_18.target<void>() != 0);
+   ASIO_CHECK(!!ex_no_props_18);
   ASIO_CHECK(ex_no_props_18 != null_ptr);
-#endif
 }
 
 void any_ref_assignment_test()
 {
   typedef tag_invokes::any_ref<> ex_no_props_t;
-#if 1
-  thread_pool pool(1);
-  asio::nullptr_t null_ptr = asio::nullptr_t();
-#else
+
   typedef tag_invokes::any_ref<
-      execution::blocking_t
+      typename execution::get_blocking_o<>::type
     > ex_one_prop_t;
 
   typedef tag_invokes::any_ref<
-      execution::blocking_t,
-      execution::occupancy_t
+      typename execution::get_blocking_o<>::type,
+      typename execution::get_occupancy_o<>::type
     > ex_two_props_t;
 
   thread_pool pool(1);
@@ -454,42 +451,42 @@ void any_ref_assignment_test()
   ex_two_props_t ex_two_props_2;
   ex_two_props_2 = null_ptr;
 
-  ASIO_CHECK(ex_two_props_2.target<void>() == 0);
+  ASIO_CHECK(!ex_two_props_2);
 
   ex_two_props_t ex_two_props_3;
   ex_two_props_3 = pool.executor();
 
-  ASIO_CHECK(ex_two_props_3.target<void>() != 0);
+  ASIO_CHECK(!!ex_two_props_3);
 
   ex_two_props_t ex_two_props_4;
   ex_two_props_4 = ex_two_props_1;
 
-  ASIO_CHECK(ex_two_props_4.target<void>() == 0);
+  ASIO_CHECK(!ex_two_props_4);
   ASIO_CHECK(ex_two_props_4 == ex_two_props_1);
 
   ex_two_props_4 = ex_two_props_3;
 
-  ASIO_CHECK(ex_two_props_4.target<void>() != 0);
+  ASIO_CHECK(!!ex_two_props_4);
   ASIO_CHECK(ex_two_props_4 == ex_two_props_3);
 
   ex_two_props_t ex_two_props_5;
   ex_two_props_5 = fat_executor(1);
 
-  ASIO_CHECK(ex_two_props_5.target<void>() != 0);
+  ASIO_CHECK(!!ex_two_props_5);
   ASIO_CHECK(ex_two_props_5 != null_ptr);
   ASIO_CHECK(ex_two_props_5 != ex_two_props_1);
 
   ex_two_props_t ex_two_props_6;
   ex_two_props_6 = fat_executor(1);
 
-  ASIO_CHECK(ex_two_props_6.target<void>() != 0);
+  ASIO_CHECK(!!ex_two_props_6);
   ASIO_CHECK(ex_two_props_6 != null_ptr);
   ASIO_CHECK(ex_two_props_6 != ex_two_props_1);
   ASIO_CHECK(ex_two_props_6 == ex_two_props_5);
 
   ex_two_props_6 = fat_executor(2);
 
-  ASIO_CHECK(ex_two_props_6.target<void>() != 0);
+  ASIO_CHECK(!!ex_two_props_6);
   ASIO_CHECK(ex_two_props_6 != null_ptr);
   ASIO_CHECK(ex_two_props_6 != ex_two_props_1);
   ASIO_CHECK(ex_two_props_6 != ex_two_props_5);
@@ -497,7 +494,7 @@ void any_ref_assignment_test()
   ex_two_props_t ex_two_props_7;
   ex_two_props_7 = ex_two_props_5;
 
-  ASIO_CHECK(ex_two_props_7.target<void>() != 0);
+  ASIO_CHECK(!!ex_two_props_7);
   ASIO_CHECK(ex_two_props_7 != null_ptr);
   ASIO_CHECK(ex_two_props_7 != ex_two_props_1);
   ASIO_CHECK(ex_two_props_7 == ex_two_props_5);
@@ -507,19 +504,19 @@ void any_ref_assignment_test()
   ex_two_props_t ex_two_props_8;
   ex_two_props_8 = std::move(ex_two_props_1);
 
-  ASIO_CHECK(ex_two_props_8.target<void>() == 0);
-  ASIO_CHECK(ex_two_props_1.target<void>() == 0);
+  ASIO_CHECK(!ex_two_props_8);
+  ASIO_CHECK(!ex_two_props_1);
 
   ex_two_props_8 = std::move(ex_two_props_3);
 
-  ASIO_CHECK(ex_two_props_8.target<void>() != 0);
-  ASIO_CHECK(ex_two_props_3.target<void>() == 0);
+  ASIO_CHECK(!!ex_two_props_8);
+  ASIO_CHECK(!ex_two_props_3);
   ASIO_CHECK(ex_two_props_8 == ex_two_props_4);
 
   ex_two_props_8 = std::move(ex_two_props_5);
 
-  ASIO_CHECK(ex_two_props_8.target<void>() != 0);
-  ASIO_CHECK(ex_two_props_5.target<void>() == 0);
+  ASIO_CHECK(!!ex_two_props_8);
+  ASIO_CHECK(!ex_two_props_5);
   ASIO_CHECK(ex_two_props_8 == ex_two_props_7);
 #endif // defined(ASIO_HAS_MOVE)
 
@@ -528,42 +525,42 @@ void any_ref_assignment_test()
   ex_one_prop_t ex_one_prop_2;
   ex_one_prop_2 = null_ptr;
 
-  ASIO_CHECK(ex_one_prop_2.target<void>() == 0);
+  ASIO_CHECK(!ex_one_prop_2);
 
   ex_one_prop_t ex_one_prop_3;
   ex_one_prop_3 = pool.executor();
 
-  ASIO_CHECK(ex_one_prop_3.target<void>() != 0);
+  ASIO_CHECK(!!ex_one_prop_3);
 
   ex_one_prop_t ex_one_prop_4;
   ex_one_prop_4 = ex_one_prop_1;
 
-  ASIO_CHECK(ex_one_prop_4.target<void>() == 0);
+  ASIO_CHECK(!ex_one_prop_4);
   ASIO_CHECK(ex_one_prop_4 == ex_one_prop_1);
 
   ex_one_prop_4 = ex_one_prop_3;
 
-  ASIO_CHECK(ex_one_prop_4.target<void>() != 0);
+  ASIO_CHECK(!!ex_one_prop_4);
   ASIO_CHECK(ex_one_prop_4 == ex_one_prop_3);
 
   ex_one_prop_t ex_one_prop_5;
   ex_one_prop_5 = fat_executor(1);
 
-  ASIO_CHECK(ex_one_prop_5.target<void>() != 0);
+  ASIO_CHECK(!!ex_one_prop_5);
   ASIO_CHECK(ex_one_prop_5 != null_ptr);
   ASIO_CHECK(ex_one_prop_5 != ex_one_prop_1);
 
   ex_one_prop_t ex_one_prop_6;
   ex_one_prop_6 = fat_executor(1);
 
-  ASIO_CHECK(ex_one_prop_6.target<void>() != 0);
+  ASIO_CHECK(!!ex_one_prop_6);
   ASIO_CHECK(ex_one_prop_6 != null_ptr);
   ASIO_CHECK(ex_one_prop_6 != ex_one_prop_1);
   ASIO_CHECK(ex_one_prop_6 == ex_one_prop_5);
 
   ex_one_prop_6 = fat_executor(2);
 
-  ASIO_CHECK(ex_one_prop_6.target<void>() != 0);
+  ASIO_CHECK(!!ex_one_prop_6);
   ASIO_CHECK(ex_one_prop_6 != null_ptr);
   ASIO_CHECK(ex_one_prop_6 != ex_one_prop_1);
   ASIO_CHECK(ex_one_prop_6 != ex_one_prop_5);
@@ -571,7 +568,7 @@ void any_ref_assignment_test()
   ex_one_prop_t ex_one_prop_7;
   ex_one_prop_7 = ex_one_prop_5;
 
-  ASIO_CHECK(ex_one_prop_7.target<void>() != 0);
+  ASIO_CHECK(!!ex_one_prop_7);
   ASIO_CHECK(ex_one_prop_7 != null_ptr);
   ASIO_CHECK(ex_one_prop_7 != ex_one_prop_1);
   ASIO_CHECK(ex_one_prop_7 == ex_one_prop_5);
@@ -581,76 +578,76 @@ void any_ref_assignment_test()
   ex_one_prop_t ex_one_prop_8;
   ex_one_prop_8 = std::move(ex_one_prop_1);
 
-  ASIO_CHECK(ex_one_prop_8.target<void>() == 0);
-  ASIO_CHECK(ex_one_prop_1.target<void>() == 0);
+  ASIO_CHECK(!ex_one_prop_8);
+  ASIO_CHECK(!ex_one_prop_1);
 
   ex_one_prop_8 = std::move(ex_one_prop_3);
 
-  ASIO_CHECK(ex_one_prop_8.target<void>() != 0);
-  ASIO_CHECK(ex_one_prop_3.target<void>() == 0);
+  ASIO_CHECK(!!ex_one_prop_8);
+  ASIO_CHECK(!ex_one_prop_3);
   ASIO_CHECK(ex_one_prop_8 == ex_one_prop_4);
 
   ex_one_prop_8 = std::move(ex_one_prop_5);
 
-  ASIO_CHECK(ex_one_prop_8.target<void>() != 0);
-  ASIO_CHECK(ex_one_prop_5.target<void>() == 0);
+  ASIO_CHECK(!!ex_one_prop_8);
+  ASIO_CHECK(!ex_one_prop_5);
   ASIO_CHECK(ex_one_prop_8 == ex_one_prop_7);
 #endif // defined(ASIO_HAS_MOVE)
 
   ex_one_prop_t ex_one_prop_9;
   ex_one_prop_9 = ex_two_props_1;
 
-  ASIO_CHECK(ex_one_prop_9.target<void>() == 0);
+  ASIO_CHECK(!ex_one_prop_9);
 
   ex_one_prop_9 = ex_two_props_4;
 
-  ASIO_CHECK(ex_one_prop_9.target<void>() != 0);
+  ASIO_CHECK(!!ex_one_prop_9);
 
   ex_one_prop_9 = ex_two_props_7;
 
-  ASIO_CHECK(ex_one_prop_9.target<void>() != 0);
-#endif
+  ASIO_CHECK(!!ex_one_prop_9);
+
   ex_no_props_t ex_no_props_1;
 
   ex_no_props_t ex_no_props_2;
   ex_no_props_2 = null_ptr;
 
-//   ASIO_CHECK(ex_no_props_2.target<void>() == 0);
+   ASIO_CHECK(!ex_no_props_2);
 
   ex_no_props_t ex_no_props_3;
   ex_no_props_3 = pool.executor();
 
-//   ASIO_CHECK(ex_no_props_3.target<void>() != 0);
+   ASIO_CHECK(!!ex_no_props_3);
 
   ex_no_props_t ex_no_props_4;
   ex_no_props_4 = ex_no_props_1;
 
-//   ASIO_CHECK(ex_no_props_4.target<void>() == 0);
+   ASIO_CHECK(!ex_no_props_4);
   ASIO_CHECK(ex_no_props_4 == ex_no_props_1);
 
   ex_no_props_4 = ex_no_props_3;
 
-//   ASIO_CHECK(ex_no_props_4.target<void>() != 0);
+   ASIO_CHECK(!!ex_no_props_4);
   ASIO_CHECK(ex_no_props_4 == ex_no_props_3);
 
   ex_no_props_t ex_no_props_5;
   ex_no_props_5 = fat_executor(1);
 
-//   ASIO_CHECK(ex_no_props_5.target<void>() != 0);
+   ASIO_CHECK(!!ex_no_props_5);
   ASIO_CHECK(ex_no_props_5 != null_ptr);
   ASIO_CHECK(ex_no_props_5 != ex_no_props_1);
 
   ex_no_props_t ex_no_props_6;
   ex_no_props_6 = fat_executor(1);
 
-//   ASIO_CHECK(ex_no_props_6.target<void>() != 0);
+   ASIO_CHECK(!!ex_no_props_6);
   ASIO_CHECK(ex_no_props_6 != null_ptr);
   ASIO_CHECK(ex_no_props_6 != ex_no_props_1);
   ASIO_CHECK(ex_no_props_6 == ex_no_props_5);
 
   ex_no_props_6 = fat_executor(2);
 
-//   ASIO_CHECK(ex_no_props_6.target<void>() != 0);
+   ASIO_CHECK(!!ex_no_props_6);
   ASIO_CHECK(ex_no_props_6 != null_ptr);
   ASIO_CHECK(ex_no_props_6 != ex_no_props_1);
   ASIO_CHECK(ex_no_props_6 != ex_no_props_5);
@@ -658,7 +655,7 @@ void any_ref_assignment_test()
   ex_no_props_t ex_no_props_7;
   ex_no_props_7 = ex_no_props_5;
 
-//   ASIO_CHECK(ex_no_props_7.target<void>() != 0);
+   ASIO_CHECK(!!ex_no_props_7);
   ASIO_CHECK(ex_no_props_7 != null_ptr);
   ASIO_CHECK(ex_no_props_7 != ex_no_props_1);
   ASIO_CHECK(ex_no_props_7 == ex_no_props_5);
@@ -668,64 +665,59 @@ void any_ref_assignment_test()
   ex_no_props_t ex_no_props_8;
   ex_no_props_8 = std::move(ex_no_props_1);
 
-//   ASIO_CHECK(ex_no_props_8.target<void>() == 0);
-//   ASIO_CHECK(ex_no_props_1.target<void>() == 0);
+   ASIO_CHECK(!ex_no_props_8);
+   ASIO_CHECK(!ex_no_props_1);
 
   ex_no_props_8 = std::move(ex_no_props_3);
 
-//   ASIO_CHECK(ex_no_props_8.target<void>() != 0);
-//   ASIO_CHECK(ex_no_props_3.target<void>() == 0);
+   ASIO_CHECK(!!ex_no_props_8);
+   ASIO_CHECK(!ex_no_props_3);
   ASIO_CHECK(ex_no_props_8 == ex_no_props_4);
 
   ex_no_props_8 = std::move(ex_no_props_5);
 
-//   ASIO_CHECK(ex_no_props_8.target<void>() != 0);
-//   ASIO_CHECK(ex_no_props_5.target<void>() == 0);
+   ASIO_CHECK(!!ex_no_props_8);
+   ASIO_CHECK(!ex_no_props_5);
   ASIO_CHECK(ex_no_props_8 == ex_no_props_7);
 #endif // defined(ASIO_HAS_MOVE)
 
-#if 0
   ex_no_props_t ex_no_props_9;
   ex_no_props_9 = ex_two_props_1;
 
-//   ASIO_CHECK(ex_no_props_9.target<void>() == 0);
+   ASIO_CHECK(!ex_no_props_9);
 
   ex_no_props_9 = ex_two_props_4;
 
-//   ASIO_CHECK(ex_no_props_9.target<void>() != 0);
+   ASIO_CHECK(!!ex_no_props_9);
 
   ex_no_props_9 = ex_two_props_7;
 
-//   ASIO_CHECK(ex_no_props_9.target<void>() != 0);
+   ASIO_CHECK(!!ex_no_props_9);
 
   ex_no_props_9 = ex_one_prop_1;
 
-//   ASIO_CHECK(ex_no_props_9.target<void>() == 0);
+   ASIO_CHECK(!ex_no_props_9);
 
   ex_no_props_9 = ex_one_prop_4;
 
-//   ASIO_CHECK(ex_no_props_9.target<void>() != 0);
+   ASIO_CHECK(!!ex_no_props_9);
 
   ex_no_props_9 = ex_one_prop_7;
 
-//   ASIO_CHECK(ex_no_props_9.target<void>() != 0);
-#endif
+   ASIO_CHECK(!!ex_no_props_9);
 }
 
 void any_ref_swap_test()
 {
   typedef tag_invokes::any_ref<> ex_no_props_t;
-#if 1
-  thread_pool pool1(1);
-  ex_no_props_t ex_no_props_1(pool1.executor());
-#else 
+
   typedef tag_invokes::any_ref<
-      execution::blocking_t
+      typename execution::get_blocking_o<>::type
     > ex_one_prop_t;
 
   typedef tag_invokes::any_ref<
-      execution::blocking_t,
-      execution::occupancy_t
+      typename execution::get_blocking_o<>::type,
+      typename execution::get_occupancy_o<>::type
     > ex_two_props_t;
 
   thread_pool pool1(1);
@@ -787,7 +779,6 @@ void any_ref_swap_test()
 
   ASIO_CHECK(ex_two_props_3 == ex_two_props_1);
   ASIO_CHECK(ex_two_props_4 == ex_two_props_2);
-#endif
 }
 
 void any_ref_query_test()
